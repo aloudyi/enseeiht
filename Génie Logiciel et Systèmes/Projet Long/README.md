@@ -1,5 +1,4 @@
-## Projet d'Ingénierie Dirigée par les Modèles :
-Modélisation, Vérification et Génération de Jeux  
+## Projet d'Ingénierie Dirigée par les Modèles : Modélisation, Vérification et Génération de Jeux  
 
 #### Documents à rendre  
 * **D1** : Le modèle Xtext décrivant la syntaxe concrète textuelle des modèles  
