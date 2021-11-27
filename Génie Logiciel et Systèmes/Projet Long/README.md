@@ -9,4 +9,4 @@ de jeux (**_game.xtext_**).
 dans la syntaxe concrète textuelle définie avec Xtext (**_enigme.game_**).
 * **D4** : Un réseau de Petri au format Tina représentant le déroulement du  
 jeu de l’exemple enigme et les propriétés LTL exprimant l’existence d’une  
-solution pour ce jeu (**_enigme.net** et **_enigme.ltl_**).
+solution pour ce jeu (**_enigme.net_** et **_enigme.ltl_**).
