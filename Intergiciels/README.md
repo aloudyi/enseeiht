@@ -57,7 +57,7 @@ en quatrième paramètre.
   
 Après tentative de connexion, le serveur accepte la connexion du client, et reçoit un  
 nouveau socket lié au même port local (Pour communiquer avec le socket du client).  
-** Socket socketduserveur = ss.server.accept()**
+**Socket socketduserveur = ss.server.accept()**
 > Une fois le socket créé, l'attente de connexion provenant du client se fait à l'aide  
 de la méthode accept().  
 La méthode accept() reste bloquante tant qu'elle n'a pas détecté de connexion.  
