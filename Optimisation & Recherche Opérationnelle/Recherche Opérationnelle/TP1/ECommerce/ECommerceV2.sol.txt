@@ -1,0 +1,72 @@
+Problem:    ModelECommerceV2withData
+Rows:       15
+Columns:    18 (6 integer, 6 binary)
+Non-zeros:  57
+Status:     INTEGER OPTIMAL
+Objective:  CoutCommandes = 15 (MINimum)
+
+   No.   Row name        Activity     Lower bound   Upper bound
+------ ------------    ------------- ------------- -------------
+     1 RespectDemandeAuMieuxPossible[f1]
+                                   3             3             = 
+     2 RespectDemandeAuMieuxPossible[f2]
+                                   3             3             = 
+     3 RespectStockMagasinParFluides[f1,M1]
+                                   2                         2.5 
+     4 RespectStockMagasinParFluides[f1,M2]
+                                   1                           1 
+     5 RespectStockMagasinParFluides[f1,M3]
+                                   0                           2 
+     6 RespectStockMagasinParFluides[f2,M1]
+                                   0                           1 
+     7 RespectStockMagasinParFluides[f2,M2]
+                                   1                           2 
+     8 RespectStockMagasinParFluides[f2,M3]
+                                   2                           2 
+     9 RespectCoutTransport[D1,M1]
+                                   0            -0             = 
+    10 RespectCoutTransport[D1,M2]
+                                   0            -0             = 
+    11 RespectCoutTransport[D1,M3]
+                                   0            -0             = 
+    12 RespectCoutTransport[D2,M1]
+                                   0            -0             = 
+    13 RespectCoutTransport[D2,M2]
+                                   0            -0             = 
+    14 RespectCoutTransport[D2,M3]
+                                   0            -0             = 
+    15 CoutCommandes
+                                  15                             
+
+   No. Column name       Activity     Lower bound   Upper bound
+------ ------------    ------------- ------------- -------------
+     1 Q[f1,M1,D1]                 1             0               
+     2 Q[f1,M1,D2]                 1             0               
+     3 Q[f1,M2,D1]                 1             0               
+     4 Q[f1,M2,D2]                 0             0               
+     5 Q[f1,M3,D1]                 0             0               
+     6 Q[f1,M3,D2]                 0             0               
+     7 Q[f2,M1,D1]                 0             0               
+     8 Q[f2,M1,D2]                 0             0               
+     9 Q[f2,M2,D1]                 0             0               
+    10 Q[f2,M2,D2]                 1             0               
+    11 Q[f2,M3,D1]                 1             0               
+    12 Q[f2,M3,D2]                 1             0               
+    13 P[D1,M1]     *              1             0             1 
+    14 P[D1,M2]     *              1             0             1 
+    15 P[D1,M3]     *              1             0             1 
+    16 P[D2,M1]     *              1             0             1 
+    17 P[D2,M2]     *              1             0             1 
+    18 P[D2,M3]     *              1             0             1 
+
+Integer feasibility conditions:
+
+KKT.PE: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+KKT.PB: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+End of output

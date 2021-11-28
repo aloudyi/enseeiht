@@ -1,0 +1,112 @@
+#  GLPK model file created by SUN for RO teaching
+
+
+###############################  Model ###############################
+
+
+
+###############################  Sets  ###############################
+
+set PRODUITS; 
+
+set METAUX;
+
+set CREDITS;
+
+################### Variables ###################
+
+var Q{i in PRODUITS}, >=0; 
+# or binary ?; 
+
+###################  Constants: Data to load   #########################
+
+param tauxdinteret{i in PRODUITS};
+
+param coeffrisque{i in PRODUITS};
+
+param risquemax;
+
+param budgetmax;
+
+param investmaxparproduit;
+
+param investminmetaux;
+
+param investmincredits;
+################### Constraints ###################
+
+
+s.t. RespectInvestissementMax :
+	(sum{i in PRODUITS} Q[i]) <= budgetmax;
+
+s.t. RespectInvestissementMaxParProduit{j in PRODUITS} :
+	(sum{i in PRODUITS} Q[i]*investmaxparproduit) >= Q[j];
+
+s.t. RespectRisqueGlobal :
+	(sum{i in PRODUITS} Q[i]*coeffrisque[i]) <= (sum{i in PRODUITS} Q[i]*risquemax);
+
+s.t. RespectInvestissementMinMetaux :
+	(sum{i in PRODUITS} Q[i]*investminmetaux) <= (sum{i in METAUX} Q[i]);
+
+s.t. RespectInvestissementMinCreditOblig :
+	(sum{i in PRODUITS} Q[i]*investmincredits) <= (sum{i in CREDITS} Q[i]);
+
+###### Objective ######
+
+maximize Investissement: 
+		sum{i in PRODUITS} Q[i]*tauxdinteret[i]; 
+
+#end;
+
+
+#default data
+
+data;
+
+set PRODUITS := 
+CreditsCommerciaux
+ObligationsSocietes
+StocksOr
+StocksPlatine
+TitresHypo
+PretsConstruction;
+
+set METAUX :=
+StocksOr
+StocksPlatine;
+
+set CREDITS := 
+CreditsCommerciaux
+ObligationsSocietes;
+
+param tauxdinteret :=
+CreditsCommerciaux 0.07
+ObligationsSocietes 0.10
+StocksOr 0.19
+StocksPlatine 0.12
+TitresHypo 0.08
+PretsConstruction 0.14;
+
+param coeffrisque :=
+CreditsCommerciaux 1.7
+ObligationsSocietes 1.2
+StocksOr 3.7
+StocksPlatine 2.4
+TitresHypo 2.0
+PretsConstruction 2.9;
+
+param risquemax :=
+2.0;
+
+param budgetmax :=
+5000000;
+
+param investmaxparproduit :=
+0.25;
+
+param investminmetaux :=
+0.3;
+
+param investmincredits :=
+0.45;
+end;

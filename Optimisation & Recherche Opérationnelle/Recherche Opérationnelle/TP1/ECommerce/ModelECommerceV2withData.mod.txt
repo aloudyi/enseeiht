@@ -1,0 +1,85 @@
+#  GLPK model file created by SUN for RO teaching
+
+
+###############################  Model ###############################
+
+
+
+###############################  Sets  ###############################
+
+set FLUIDES; 
+
+set MAGASINS;
+
+set DEMANDES;
+
+################### Variables ###################
+# Combien de fluide on prend de chaque magasin
+var Q{i in FLUIDES, j in MAGASINS, k in DEMANDES}, >=0;
+var P{i in DEMANDES, j in MAGASINS}, binary >=0;
+# or binary ?; 
+
+###################  Constants: Data to load   #########################
+
+param demandesparfluides{i in FLUIDES, j in DEMANDES}; 
+
+param stockfluidesparmagasin{i in FLUIDES, j in MAGASINS};
+
+param coutfluidesparmagasin{i in FLUIDES, j in MAGASINS};
+
+param coutdemandesparmagasins{i in DEMANDES, j in MAGASINS};
+
+param zero;
+################### Constraints ###################
+
+s.t. RespectDemandeAuMieuxPossible{i in FLUIDES}:
+    (sum{j in MAGASINS, k in DEMANDES} Q[i,j,k])+((sum{j in MAGASINS} stockfluidesparmagasin[i,j]) less (sum{k in DEMANDES} demandesparfluides[i,k])) = (sum{j in MAGASINS} stockfluidesparmagasin[i,j]);
+
+s.t. RespectStockMagasinParFluides{i in FLUIDES, j in MAGASINS}:
+    (sum{k in DEMANDES} Q[i,j,k]) <= stockfluidesparmagasin[i,j];
+
+s.t. RespectCoutTransport{i in DEMANDES, j in MAGASINS}:
+    P[i,j] = sum{k in FLUIDES} Q[k,j,i];
+###### Objective ######
+
+minimize CoutCommandes:
+    (sum{i in FLUIDES, j in MAGASINS, k in DEMANDES} Q[i,j,k]*coutfluidesparmagasin[i,j]) +(sum{i in DEMANDES, j in MAGASINS} P[i,j]*coutdemandesparmagasins[i,j]) ;
+#end;
+
+
+#default data
+
+data;
+
+set FLUIDES := 
+f1
+f2;
+
+set DEMANDES :=
+D1
+D2;
+
+set MAGASINS :=
+M1
+M2
+M3;
+
+param demandesparfluides : D1 D2 :=
+f1 2 1
+f2 0 3; 
+
+param coutfluidesparmagasin : M1 M2 M3 :=
+f1 1 2 3
+f2 1 3 2; 
+
+param stockfluidesparmagasin : M1 M2 M3 :=
+f1 2.5 1 2
+f2 1 2 2;
+
+param coutdemandesparmagasins : M1 M2 M3 :=
+D1 1 0 0
+D2 0 2 1;
+
+param zero :=
+0;
+end;

@@ -1,0 +1,83 @@
+#  GLPK model file created by SUN for RO teaching
+
+
+###############################  Model ###############################
+
+
+
+###############################  Sets  ###############################
+
+set VOITURES; 
+	
+
+################### Variables ###################
+
+var Q{i in VOITURES}, integer >=0; 
+# or binary ?; 
+
+###################  Constants: Data to load   #########################
+
+param benefparmodele{i in VOITURES}; 
+
+param surface{i in VOITURES}; 
+
+param dureefab{i in VOITURES};
+
+param dureeProduction;
+
+param surfacePark;
+
+param LimiteProduction{i in VOITURES};
+
+################### Constraints ###################
+
+
+s.t. RespectCapaciteDeTempsdeProduction:
+    sum{i in VOITURES} dureefab[i] * Q[i] <=  dureeProduction;
+s.t. RespectCapaciteDeSurfaceParking:
+    sum{i in VOITURES} surface[i] * Q[i] <=  surfacePark;
+s.t. RespectLimitedeProduction{i in VOITURES}: 
+    Q[i] <= LimiteProduction[i];
+
+
+###### Objective ######
+
+maximize BeneficeTotal: 
+		sum{i in VOITURES} Q[i]* benefparmodele[i]; 
+
+#end;
+
+
+#default data
+
+data;
+
+
+set VOITURES :=
+ModeleS
+ModeleL;
+
+param dureefab :=
+ModeleS 5
+ModeleL 6;
+
+param surface :=
+ModeleS 20 
+ModeleL 10;
+
+param benefparmodele :=
+ModeleS 9000
+ModeleL 10000;
+
+param surfacePark :=
+15000;
+
+param LimiteProduction :=
+ModeleS 90000
+ModeleL 800;
+
+param dureeProduction :=
+6000;
+
+
+end;

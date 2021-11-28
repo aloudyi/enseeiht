@@ -1,6 +1,6 @@
 ## Projet d'Ingénierie Dirigée par les Modèles : Modélisation, Vérification et Génération de Jeux  
 
-#### Documents à rendre  
+### **Documents à rendre**  
 * **D1** : Le modèle Xtext décrivant la syntaxe concrète textuelle des modèles  
 de jeux (**_game.xtext_**).
 * **D2** : Une vue graphique mise en page du métamodèle généré par Xtext (**_game.png_**).

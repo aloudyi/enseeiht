@@ -1,0 +1,48 @@
+Problem:    ModelECommerceV1withDataEntier
+Rows:       9
+Columns:    6 (6 integer, 0 binary)
+Non-zeros:  18
+Status:     INTEGER OPTIMAL
+Objective:  CoutCommandes = 9 (MINimum)
+
+   No.   Row name        Activity     Lower bound   Upper bound
+------ ------------    ------------- ------------- -------------
+     1 RespectDemandeAuMieuxPossible[f1]
+                                   3             3             = 
+     2 RespectDemandeAuMieuxPossible[f2]
+                                   3             3             = 
+     3 RespectStockMagasinParFluides[f1,M1]
+                                   2                         2.5 
+     4 RespectStockMagasinParFluides[f1,M2]
+                                   1                           1 
+     5 RespectStockMagasinParFluides[f1,M3]
+                                   0                           2 
+     6 RespectStockMagasinParFluides[f2,M1]
+                                   1                           1 
+     7 RespectStockMagasinParFluides[f2,M2]
+                                   0                           2 
+     8 RespectStockMagasinParFluides[f2,M3]
+                                   2                           2 
+     9 CoutCommandes
+                                   9                             
+
+   No. Column name       Activity     Lower bound   Upper bound
+------ ------------    ------------- ------------- -------------
+     1 Q[f1,M1]     *              2             0               
+     2 Q[f1,M2]     *              1             0               
+     3 Q[f1,M3]     *              0             0               
+     4 Q[f2,M1]     *              1             0               
+     5 Q[f2,M2]     *              0             0               
+     6 Q[f2,M3]     *              2             0               
+
+Integer feasibility conditions:
+
+KKT.PE: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+KKT.PB: max.abs.err = 0.00e+00 on row 0
+        max.rel.err = 0.00e+00 on row 0
+        High quality
+
+End of output

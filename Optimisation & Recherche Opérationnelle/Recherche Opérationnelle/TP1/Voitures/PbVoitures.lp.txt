@@ -1,0 +1,11 @@
+\* Problem: Fabrication de ciment *\
+
+Maximize
+ Benefice: +1000000 L + 900000 S
+
+Subject To
+ CapaciteduParking: + 10 L + 20 S <= 150
+ CapaciteHoraire: + 6 L + 5 S <= 60
+ CapacitedeVoitureLuxe: L <= 8
+
+End
