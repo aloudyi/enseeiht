@@ -8,17 +8,17 @@
 * `finishWriting`
 
 ### Déterminer les prédicats d'acceptation des opérations
-* On ne peut entamer le début de lecture (`startReading`)  
+* On ne peut entamer le début de lecture `(startReading)`  
 que s'il n'y a pas d'écriture en cours ni de prise en cours.  
-(`currentlyWriting, currentlyTaking`) 
-* On ne peut entamer le début de prise (`startTaking`) que  
+`(currentlyWriting, currentlyTaking)` 
+* On ne peut entamer le début de prise `(startTaking)` que  
 s'il n'y a pas de lecture en cours, de lecteurs en attente,  
 d'écriture en cours ni de prise en cours.  
-(`currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0`)
-* On ne peut entamer le début d'écriture (`startReading`) que  
+`(currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0)`
+* On ne peut entamer le début d'écriture `(startReading)` que  
 s'il n'y a pas de lecture en cours, de lecteurs en attente,  
 d'écriture en cours ni de prise en cours.  
-(`currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0`)
+`(currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0)`
 
 ### Déterminer les variables d'états pour écrire les prédicats
 * *Booléens* `currentlyWriting`, `currentlyTaking`.  
@@ -34,6 +34,6 @@ d'écriture en cours ni de prise en cours.
  `DebutEcriture := (!currentlyWriting && ! currentlyTaking && (readers == 0) && (waitingReaders ==0))`
 
  ### Pour chaque prédicat définir une variable condition
- * DebutLecture -> readPossible
- * DebutPrise -> takePossible
- * DebutEcriture -> writePossible
+ * `DebutLecture &#8594 readPossible`
+ * `DebutPrise &#8594 takePossible`
+ * `DebutEcriture &#8594 writePossible`
