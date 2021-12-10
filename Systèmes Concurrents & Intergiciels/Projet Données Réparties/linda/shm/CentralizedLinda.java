@@ -246,6 +246,9 @@ public class CentralizedLinda implements Linda {
         return null;
     }
 
+    /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
+     * if it doesn't find a matching Tuple, it returns -1.
+     */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
         int indexOfTemplate = -1;
     	for(Tuple t : tupleSpace) {
