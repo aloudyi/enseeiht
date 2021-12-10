@@ -18,7 +18,7 @@ public class BasicTest2 {
                         e.printStackTrace();
                     }
                     Tuple motif = new Tuple(Integer.class, String.class);
-                    Tuple res = linda.read(motif);
+                    Tuple res = linda.tryRead(motif);
                     System.out.println("("+j+") Resultat:" + res);
                     linda.debug("("+j+")");
                 }

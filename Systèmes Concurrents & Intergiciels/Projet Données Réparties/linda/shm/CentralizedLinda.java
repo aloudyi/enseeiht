@@ -6,7 +6,7 @@ import linda.Tuple;
 import java.util.*;
 import java.util.Random;
 import java.util.concurrent.locks.*;
-import Synchro.Assert;
+import linda.Synchro.Assert;
 /** Shared memory implementation of Linda. */
 public class CentralizedLinda implements Linda {
 	// L'espace des Tuples qu'on va manipuler
@@ -17,7 +17,7 @@ public class CentralizedLinda implements Linda {
     private Condition readPossible;
     // condition prise (take)
     private Condition takePossible;
-    // condition écriture (write)
+    // condition Ã©criture (write)
     private Condition writePossible;
     // ecriture en cours ?
     private boolean currentlyWriting;
@@ -27,7 +27,7 @@ public class CentralizedLinda implements Linda {
     private int currentReaders;
     // nombre de lecteurs en attente
     private int waitingReaders;
-    // nombre d'écrivains en attente
+    // nombre d'Ã©crivains en attente
     private int waitingWriters;
 
     public CentralizedLinda() {
@@ -41,6 +41,7 @@ public class CentralizedLinda implements Linda {
         currentReaders = 0;
         waitingReaders = 0;
         waitingWriters = 0;
+        tupleSpace = new ArrayList<>();
 
     }
 
@@ -148,16 +149,17 @@ public class CentralizedLinda implements Linda {
      * Blocks if no corresponding tuple is found. */
     public Tuple take(Tuple template) {
         Tuple tuple = null;
+        int indexOfTemplate = -1;
         try {
-            startTaking();
-            while(!tupleSpace.contains(template)) {
-                // Boucle bloquante
+            while(indexOfTemplate == -1) {
+            	startTaking();
+            	indexOfTemplate = indexOfTemplate(tupleSpace, template);
+                if(indexOfTemplate != -1) {
+    	            tuple = tupleSpace.get(indexOfTemplate);
+    	            tupleSpace.remove(indexOfTemplate);
+                }
+                finishTaking();
             }
-            int indexOfTemplate = tupleSpace.indexOf(template);
-            tuple = tupleSpace.get(indexOfTemplate);
-            System.out.println(tuple.toString());
-            tupleSpace.remove(indexOfTemplate);
-            finishTaking();
         } catch ( InterruptedException e) {
             debug("khratTake");
         }
@@ -167,16 +169,17 @@ public class CentralizedLinda implements Linda {
     /** Returns a tuple matching the template and leaves it in the tuplespace.
      * Blocks if no corresponding tuple is found. */
     public Tuple read(Tuple template) {
-        Tuple tuple = null;
+    	Tuple tuple = null;
+        int indexOfTemplate = -1;
         try {
-            startReading();
-            while(!tupleSpace.contains(template)) {
-                // Boucle bloquante
+            while(indexOfTemplate == -1) {
+            	startReading();
+            	indexOfTemplate = indexOfTemplate(tupleSpace, template);
+                if(indexOfTemplate != -1) {
+    	            tuple = tupleSpace.get(indexOfTemplate);
+                }
+                finishReading();
             }
-            int indexOfTemplate = tupleSpace.indexOf(template);
-            tuple = tupleSpace.get(indexOfTemplate);
-            System.out.println(tuple.toString());
-            finishReading();
         } catch ( InterruptedException e) {
             debug("khratRead");
         }
@@ -191,13 +194,38 @@ public class CentralizedLinda implements Linda {
 
     }
     public Tuple tryTake(Tuple template) {
-        return null;
+    	Tuple tuple = null;
+        int indexOfTemplate = -1;
+        try {
+            startTaking();
+            indexOfTemplate = indexOfTemplate(tupleSpace, template);
+            if(indexOfTemplate != -1) {
+            	tuple = tupleSpace.get(indexOfTemplate);
+    	        tupleSpace.remove(indexOfTemplate);
+            }
+            finishTaking();
+        } catch ( InterruptedException e) {
+            debug("khratTryTake");
+        }
+        return tuple;
     }
 
     /** Returns a tuple matching the template and leaves it in the tuplespace.
      * Returns null if none found. */
     public Tuple tryRead(Tuple template) {
-        return null;
+    	Tuple tuple = null;
+        int indexOfTemplate = -1;
+        try {
+            startReading();
+            indexOfTemplate = indexOfTemplate(tupleSpace, template);
+            if(indexOfTemplate != -1) {
+            	tuple = tupleSpace.get(indexOfTemplate);
+            }
+            finishReading();
+        } catch ( InterruptedException e) {
+            debug("khratTryRead");
+        }
+        return tuple;
     }
 
     /** Returns all the tuples matching the template and removes them from the tuplespace.
@@ -216,5 +244,15 @@ public class CentralizedLinda implements Linda {
      */
     public Collection<Tuple> readAll(Tuple template) {
         return null;
+    }
+
+    public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
+        int indexOfTemplate = -1;
+    	for(Tuple t : tupleSpace) {
+            if(t.matches(template)) {
+                indexOfTemplate = tupleSpace.indexOf(t);
+            }
+        }
+        return indexOfTemplate;
     }
 }
