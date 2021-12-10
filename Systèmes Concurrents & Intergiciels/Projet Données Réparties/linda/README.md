@@ -34,6 +34,6 @@ d'écriture en cours ni de prise en cours.
  `DebutEcriture := (!currentlyWriting && ! currentlyTaking && (readers == 0) && (waitingReaders ==0))`
 
  ### Pour chaque prédicat définir une variable condition
- * `DebutLecture &#8594 readPossible`
- * `DebutPrise &#8594 takePossible`
- * `DebutEcriture &#8594 writePossible`
+ * `DebutLecture -> readPossible`
+ * `DebutPrise -> takePossible`
+ * `DebutEcriture -> writePossible`
