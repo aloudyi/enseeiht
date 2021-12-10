@@ -8,15 +8,12 @@
 * `finishWriting`
 
 ### Déterminer les prédicats d'acceptation des opérations
-* On ne peut entamer le début de lecture `(startReading)`  
-que s'il n'y a pas d'écriture en cours ni de prise en cours.  
+* On ne peut entamer le début de lecture `(startReading)` que s'il n'y a pas d'écriture en cours ni de prise en cours.  
 `(currentlyWriting, currentlyTaking)` 
-* On ne peut entamer le début de prise `(startTaking)` que  
-s'il n'y a pas de lecture en cours, de lecteurs en attente,  
+* On ne peut entamer le début de prise `(startTaking)` que s'il n'y a pas de lecture en cours, de lecteurs en attente,  
 d'écriture en cours ni de prise en cours.  
 `(currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0)`
-* On ne peut entamer le début d'écriture `(startReading)` que  
-s'il n'y a pas de lecture en cours, de lecteurs en attente,  
+* On ne peut entamer le début d'écriture `(startReading)` que s'il n'y a pas de lecture en cours, de lecteurs en attente,  
 d'écriture en cours ni de prise en cours.  
 `(currentlyWriting, currentlyTaking, readers == 0, waitingReaders == 0)`
 
