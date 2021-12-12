@@ -13,9 +13,9 @@ public class BasicTestCallback {
     private static class MyCallback implements Callback {
         public void call(Tuple t) {
             System.out.println("CB got "+t);
-            linda.eventRegister(eventMode.TAKE, eventTiming.IMMEDIATE, cbmotif, this);
+            linda.eventRegister(eventMode.TAKE, eventTiming.IMMEDIATE, cbmotif, new MyCallback());
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
             }
             System.out.println("CB done with "+t);
@@ -23,7 +23,7 @@ public class BasicTestCallback {
     }
 
     public static void main(String[] a) {
-        linda = new linda.shm.CentralizedLinda();
+        linda = new linda.shm.CentralizedLindaEvent();
         // linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
 
         cbmotif = new Tuple(Integer.class, String.class);

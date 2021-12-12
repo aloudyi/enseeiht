@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import linda.*;
 
-public class BasicTest1 {
+public class BasicTestTakeAll1 {
 
     public static void main(String[] a) {
                 
@@ -19,8 +19,14 @@ public class BasicTest1 {
                     e.printStackTrace();
                 }
                 Tuple motif = new Tuple(Integer.class, String.class);
-                Tuple res = linda.take(motif);
-                System.out.println("(1) Resultat:" + res);
+                Collection<Tuple> res = linda.takeAll(motif);
+                if(res.isEmpty()) {
+                	System.out.println("(1) Resultat: EMPTY COLLECTION");
+                } else {
+                	for(Tuple t: res) {
+                		System.out.println("(1) Resultat:" + t);
+                	}
+                }
                 linda.debug("(1)");
             }
         }.start();
