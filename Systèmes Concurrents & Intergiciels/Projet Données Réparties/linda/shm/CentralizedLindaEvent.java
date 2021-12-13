@@ -5,7 +5,7 @@ import linda.Linda;
 import linda.Tuple;
 import java.util.*;
 import java.util.concurrent.locks.*;
-import linda.Synchro.Assert;
+import Synchro.Assert;
 /** Shared memory implementation of Linda. */
 public class CentralizedLindaEvent implements Linda {
 	// L'espace des Tuples qu'on va manipuler
@@ -289,22 +289,31 @@ public class CentralizedLindaEvent implements Linda {
 
 	@Override
     public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
-		try {
+		new Thread(() -> {try {
 			if(timing.equals(eventTiming.FUTURE)) {
-				if(mode.equals(eventMode.TAKE)) {
+				int firstIndex = tupleSpace.size(); // index of the last written element before registering
+				int lastIndex = firstIndex; // index of the last written element after registering and a write operation has been done				
+				while(lastIndex == firstIndex ) {lastIndex = tupleSpace.size();}
+				if(mode.equals(eventMode.TAKE)) {				
 					startTaking();
-					Tuple t = tupleSpace.get(tupleSpace.size()-1);
+					lastIndex = tupleSpace.size(); // in case a write operation was done just after exiting the previous while loop						
+					for(int i = firstIndex; i<lastIndex; i++) { // on parcours les �lements ajout�s apr�s l'appel de eventRegister 
+					Tuple t = tupleSpace.get(i);
 					if(t.matches(template)) {
-						tupleSpace.remove(tupleSpace.size()-1);
+						tupleSpace.remove(i);
 						callback.call(t);
-					}
+						break;
+					}}
 					finishTaking();
 				} else {
 					startReading();
-					Tuple t = tupleSpace.get(tupleSpace.size()-1);
+					lastIndex = tupleSpace.size(); // in case a write operation was done just after exiting the previous while loop						
+					for(int i = firstIndex; i<lastIndex; i++) { // on parcours les �lements ajout�s apr�s l'appel de eventRegister 
+					Tuple t = tupleSpace.get(i);
 					if(t.matches(template)) {
 						callback.call(t);
-					}	
+						break;
+					}}
 					finishReading();
 				}
 			} else {
@@ -314,15 +323,19 @@ public class CentralizedLindaEvent implements Linda {
 
 					Tuple t = this.tryTake(template);
 					System.out.println(mode);
-					System.out.println(t);	
-					callback.call(t);
+					System.out.println(t);
+					if (t != null) {
+						callback.call(t);
+					}
 				} else {
 					Tuple t = this.tryRead(template);
-					callback.call(t);
+					if (t != null) {
+						callback.call(t);
+					}
 				}
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();	
 		}
-    }
-}
+    } ).start();
+}}
