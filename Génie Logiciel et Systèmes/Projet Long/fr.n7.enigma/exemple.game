@@ -1,0 +1,36 @@
+jeu Enigme {
+    territoire Egypte {
+        debut lieu Depart {
+            personne Sphinx {
+                "Quel est la capitale du Maroc ?"
+                interaction question {
+                    choix {
+                        reponse >> "Ouarzazate" avec action "mauvaise"
+                        reponse >> "Ifrane" avec action "mauvaise"
+                        reponse >> "Ouled Taima" avec action "mauvaise"
+                        reponse >> "Rabat" avec action "bonne"
+                    }
+                }
+            }
+        }
+        fin lieu Fin {
+            personne Final {
+	            "\n"
+	            interaction finDePartie {
+	                choix {
+	                    reponse >> "Quitter la partie ?" avec action "quitter"
+	                    reponse >> "Rejouer ?" avec action "rejouer"
+	                }
+	            }  
+        	}
+        }
+        chemins {
+            chemin de Depart a Fin
+        }
+    }
+    joueur Moi {
+        objets {
+            objet Tentative de taille 3
+        }
+    }
+}

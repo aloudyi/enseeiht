@@ -1,0 +1,52 @@
+grammar fr.n7.ENIGMA with org.eclipse.xtext.common.Terminals
+
+generate eNIGMA "http://www.n7.fr/ENIGMA"
+
+Jeu :
+	'jeu' name = ID '{'
+		territoire = Territoire
+		joueur = Joueur
+	'}';
+Joueur :
+	'joueur' name = ID '{'
+		'objets' '{'
+			objet += Objet*
+		'}'
+	'}';
+Objet :
+	'objet' name = ID 'de' 'taille' taille = INT;
+
+Territoire :
+	'territoire' name = ID '{'
+		'debut' lieuDebut = Lieu
+		'fin' lieuxFin += Lieu*
+		'chemins' '{' 
+			chemins += Chemin* 
+		'}'
+	'}';
+Choix:
+	{Choix} 'choix' '{'
+		reponses += Reponse*
+	'}';
+Interaction :
+	'interaction' name = ID '{' 
+		choix += Choix*
+	'}';
+Personne :
+	'personne' name = ID '{'
+		texte = Qualification
+		(interaction = Interaction)? 
+	'}';
+Lieu :
+	'lieu' name = ID '{'
+		personne = Personne
+	'}';
+Chemin :
+	'chemin' 'de' precedent = [Lieu] 'a' suivant = [Lieu];
+
+Qualification :
+	qualification = STRING;
+Action:
+	'action' texte = STRING;
+Reponse :
+	'reponse' '>>' texte = Qualification 'avec' action = Action;
