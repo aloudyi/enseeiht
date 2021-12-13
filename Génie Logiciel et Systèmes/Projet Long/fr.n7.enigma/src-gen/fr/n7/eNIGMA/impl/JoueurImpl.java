@@ -3,6 +3,7 @@
  */
 package fr.n7.eNIGMA.impl;
 
+import fr.n7.eNIGMA.Connaissance;
 import fr.n7.eNIGMA.ENIGMAPackage;
 import fr.n7.eNIGMA.Joueur;
 import fr.n7.eNIGMA.Objet;
@@ -32,7 +33,8 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * </p>
  * <ul>
  *   <li>{@link fr.n7.eNIGMA.impl.JoueurImpl#getName <em>Name</em>}</li>
- *   <li>{@link fr.n7.eNIGMA.impl.JoueurImpl#getObjet <em>Objet</em>}</li>
+ *   <li>{@link fr.n7.eNIGMA.impl.JoueurImpl#getObjets <em>Objets</em>}</li>
+ *   <li>{@link fr.n7.eNIGMA.impl.JoueurImpl#getConnaissances <em>Connaissances</em>}</li>
  * </ul>
  *
  * @generated
@@ -60,14 +62,24 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
   protected String name = NAME_EDEFAULT;
 
   /**
-   * The cached value of the '{@link #getObjet() <em>Objet</em>}' containment reference list.
+   * The cached value of the '{@link #getObjets() <em>Objets</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getObjet()
+   * @see #getObjets()
    * @generated
    * @ordered
    */
-  protected EList<Objet> objet;
+  protected EList<Objet> objets;
+
+  /**
+   * The cached value of the '{@link #getConnaissances() <em>Connaissances</em>}' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getConnaissances()
+   * @generated
+   * @ordered
+   */
+  protected EList<Connaissance> connaissances;
 
   /**
    * <!-- begin-user-doc -->
@@ -121,13 +133,28 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
    * @generated
    */
   @Override
-  public EList<Objet> getObjet()
+  public EList<Objet> getObjets()
   {
-    if (objet == null)
+    if (objets == null)
     {
-      objet = new EObjectContainmentEList<Objet>(Objet.class, this, ENIGMAPackage.JOUEUR__OBJET);
+      objets = new EObjectContainmentEList<Objet>(Objet.class, this, ENIGMAPackage.JOUEUR__OBJETS);
     }
-    return objet;
+    return objets;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public EList<Connaissance> getConnaissances()
+  {
+    if (connaissances == null)
+    {
+      connaissances = new EObjectContainmentEList<Connaissance>(Connaissance.class, this, ENIGMAPackage.JOUEUR__CONNAISSANCES);
+    }
+    return connaissances;
   }
 
   /**
@@ -140,8 +167,10 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
   {
     switch (featureID)
     {
-      case ENIGMAPackage.JOUEUR__OBJET:
-        return ((InternalEList<?>)getObjet()).basicRemove(otherEnd, msgs);
+      case ENIGMAPackage.JOUEUR__OBJETS:
+        return ((InternalEList<?>)getObjets()).basicRemove(otherEnd, msgs);
+      case ENIGMAPackage.JOUEUR__CONNAISSANCES:
+        return ((InternalEList<?>)getConnaissances()).basicRemove(otherEnd, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -158,8 +187,10 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
     {
       case ENIGMAPackage.JOUEUR__NAME:
         return getName();
-      case ENIGMAPackage.JOUEUR__OBJET:
-        return getObjet();
+      case ENIGMAPackage.JOUEUR__OBJETS:
+        return getObjets();
+      case ENIGMAPackage.JOUEUR__CONNAISSANCES:
+        return getConnaissances();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -178,9 +209,13 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
       case ENIGMAPackage.JOUEUR__NAME:
         setName((String)newValue);
         return;
-      case ENIGMAPackage.JOUEUR__OBJET:
-        getObjet().clear();
-        getObjet().addAll((Collection<? extends Objet>)newValue);
+      case ENIGMAPackage.JOUEUR__OBJETS:
+        getObjets().clear();
+        getObjets().addAll((Collection<? extends Objet>)newValue);
+        return;
+      case ENIGMAPackage.JOUEUR__CONNAISSANCES:
+        getConnaissances().clear();
+        getConnaissances().addAll((Collection<? extends Connaissance>)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -199,8 +234,11 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
       case ENIGMAPackage.JOUEUR__NAME:
         setName(NAME_EDEFAULT);
         return;
-      case ENIGMAPackage.JOUEUR__OBJET:
-        getObjet().clear();
+      case ENIGMAPackage.JOUEUR__OBJETS:
+        getObjets().clear();
+        return;
+      case ENIGMAPackage.JOUEUR__CONNAISSANCES:
+        getConnaissances().clear();
         return;
     }
     super.eUnset(featureID);
@@ -218,8 +256,10 @@ public class JoueurImpl extends MinimalEObjectImpl.Container implements Joueur
     {
       case ENIGMAPackage.JOUEUR__NAME:
         return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-      case ENIGMAPackage.JOUEUR__OBJET:
-        return objet != null && !objet.isEmpty();
+      case ENIGMAPackage.JOUEUR__OBJETS:
+        return objets != null && !objets.isEmpty();
+      case ENIGMAPackage.JOUEUR__CONNAISSANCES:
+        return connaissances != null && !connaissances.isEmpty();
     }
     return super.eIsSet(featureID);
   }

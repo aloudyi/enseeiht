@@ -82,20 +82,28 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 		private final Keyword cLeftCurlyBracketKeyword_2 = (Keyword)cGroup.eContents().get(2);
 		private final Keyword cObjetsKeyword_3 = (Keyword)cGroup.eContents().get(3);
 		private final Keyword cLeftCurlyBracketKeyword_4 = (Keyword)cGroup.eContents().get(4);
-		private final Assignment cObjetAssignment_5 = (Assignment)cGroup.eContents().get(5);
-		private final RuleCall cObjetObjetParserRuleCall_5_0 = (RuleCall)cObjetAssignment_5.eContents().get(0);
+		private final Assignment cObjetsAssignment_5 = (Assignment)cGroup.eContents().get(5);
+		private final RuleCall cObjetsObjetParserRuleCall_5_0 = (RuleCall)cObjetsAssignment_5.eContents().get(0);
 		private final Keyword cRightCurlyBracketKeyword_6 = (Keyword)cGroup.eContents().get(6);
-		private final Keyword cRightCurlyBracketKeyword_7 = (Keyword)cGroup.eContents().get(7);
+		private final Keyword cConaissancesKeyword_7 = (Keyword)cGroup.eContents().get(7);
+		private final Keyword cLeftCurlyBracketKeyword_8 = (Keyword)cGroup.eContents().get(8);
+		private final Assignment cConnaissancesAssignment_9 = (Assignment)cGroup.eContents().get(9);
+		private final RuleCall cConnaissancesConnaissanceParserRuleCall_9_0 = (RuleCall)cConnaissancesAssignment_9.eContents().get(0);
+		private final Keyword cRightCurlyBracketKeyword_10 = (Keyword)cGroup.eContents().get(10);
+		private final Keyword cRightCurlyBracketKeyword_11 = (Keyword)cGroup.eContents().get(11);
 		
 		//Joueur:
 		//	'joueur' name=ID '{'
 		//	'objets' '{'
-		//	objet+=Objet*
+		//	objets+=Objet*
+		//	'}'
+		//	'conaissances' '{'
+		//	connaissances+=Connaissance*
 		//	'}'
 		//	'}';
 		@Override public ParserRule getRule() { return rule; }
 		
-		//'joueur' name=ID '{' 'objets' '{' objet+=Objet* '}' '}'
+		//'joueur' name=ID '{' 'objets' '{' objets+=Objet* '}' 'conaissances' '{' connaissances+=Connaissance* '}' '}'
 		public Group getGroup() { return cGroup; }
 		
 		//'joueur'
@@ -116,17 +124,55 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 		//'{'
 		public Keyword getLeftCurlyBracketKeyword_4() { return cLeftCurlyBracketKeyword_4; }
 		
-		//objet+=Objet*
-		public Assignment getObjetAssignment_5() { return cObjetAssignment_5; }
+		//objets+=Objet*
+		public Assignment getObjetsAssignment_5() { return cObjetsAssignment_5; }
 		
 		//Objet
-		public RuleCall getObjetObjetParserRuleCall_5_0() { return cObjetObjetParserRuleCall_5_0; }
+		public RuleCall getObjetsObjetParserRuleCall_5_0() { return cObjetsObjetParserRuleCall_5_0; }
 		
 		//'}'
 		public Keyword getRightCurlyBracketKeyword_6() { return cRightCurlyBracketKeyword_6; }
 		
+		//'conaissances'
+		public Keyword getConaissancesKeyword_7() { return cConaissancesKeyword_7; }
+		
+		//'{'
+		public Keyword getLeftCurlyBracketKeyword_8() { return cLeftCurlyBracketKeyword_8; }
+		
+		//connaissances+=Connaissance*
+		public Assignment getConnaissancesAssignment_9() { return cConnaissancesAssignment_9; }
+		
+		//Connaissance
+		public RuleCall getConnaissancesConnaissanceParserRuleCall_9_0() { return cConnaissancesConnaissanceParserRuleCall_9_0; }
+		
 		//'}'
-		public Keyword getRightCurlyBracketKeyword_7() { return cRightCurlyBracketKeyword_7; }
+		public Keyword getRightCurlyBracketKeyword_10() { return cRightCurlyBracketKeyword_10; }
+		
+		//'}'
+		public Keyword getRightCurlyBracketKeyword_11() { return cRightCurlyBracketKeyword_11; }
+	}
+	public class ConnaissanceElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "fr.n7.ENIGMA.Connaissance");
+		private final Group cGroup = (Group)rule.eContents().get(1);
+		private final Keyword cConaissanceKeyword_0 = (Keyword)cGroup.eContents().get(0);
+		private final Assignment cNameAssignment_1 = (Assignment)cGroup.eContents().get(1);
+		private final RuleCall cNameIDTerminalRuleCall_1_0 = (RuleCall)cNameAssignment_1.eContents().get(0);
+		
+		//Connaissance:
+		//	'conaissance' name=ID;
+		@Override public ParserRule getRule() { return rule; }
+		
+		//'conaissance' name=ID
+		public Group getGroup() { return cGroup; }
+		
+		//'conaissance'
+		public Keyword getConaissanceKeyword_0() { return cConaissanceKeyword_0; }
+		
+		//name=ID
+		public Assignment getNameAssignment_1() { return cNameAssignment_1; }
+		
+		//ID
+		public RuleCall getNameIDTerminalRuleCall_1_0() { return cNameIDTerminalRuleCall_1_0; }
 	}
 	public class ObjetElements extends AbstractParserRuleElementFinder {
 		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "fr.n7.ENIGMA.Objet");
@@ -545,6 +591,7 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 	
 	private final JeuElements pJeu;
 	private final JoueurElements pJoueur;
+	private final ConnaissanceElements pConnaissance;
 	private final ObjetElements pObjet;
 	private final TerritoireElements pTerritoire;
 	private final ChoixElements pChoix;
@@ -567,6 +614,7 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 		this.gaTerminals = gaTerminals;
 		this.pJeu = new JeuElements();
 		this.pJoueur = new JoueurElements();
+		this.pConnaissance = new ConnaissanceElements();
 		this.pObjet = new ObjetElements();
 		this.pTerritoire = new TerritoireElements();
 		this.pChoix = new ChoixElements();
@@ -622,7 +670,10 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 	//Joueur:
 	//	'joueur' name=ID '{'
 	//	'objets' '{'
-	//	objet+=Objet*
+	//	objets+=Objet*
+	//	'}'
+	//	'conaissances' '{'
+	//	connaissances+=Connaissance*
 	//	'}'
 	//	'}';
 	public JoueurElements getJoueurAccess() {
@@ -631,6 +682,16 @@ public class ENIGMAGrammarAccess extends AbstractElementFinder.AbstractGrammarEl
 	
 	public ParserRule getJoueurRule() {
 		return getJoueurAccess().getRule();
+	}
+	
+	//Connaissance:
+	//	'conaissance' name=ID;
+	public ConnaissanceElements getConnaissanceAccess() {
+		return pConnaissance;
+	}
+	
+	public ParserRule getConnaissanceRule() {
+		return getConnaissanceAccess().getRule();
 	}
 	
 	//Objet:

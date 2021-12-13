@@ -13,7 +13,11 @@
     </genClasses>
     <genClasses ecoreClass="ENIGMA.ecore#//Joueur">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ENIGMA.ecore#//Joueur/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ENIGMA.ecore#//Joueur/objet"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ENIGMA.ecore#//Joueur/objets"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference ENIGMA.ecore#//Joueur/connaissances"/>
+    </genClasses>
+    <genClasses ecoreClass="ENIGMA.ecore#//Connaissance">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ENIGMA.ecore#//Connaissance/name"/>
     </genClasses>
     <genClasses ecoreClass="ENIGMA.ecore#//Objet">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ENIGMA.ecore#//Objet/name"/>

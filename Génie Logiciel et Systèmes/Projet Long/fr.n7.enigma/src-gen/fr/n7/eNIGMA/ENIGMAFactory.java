@@ -42,6 +42,15 @@ public interface ENIGMAFactory extends EFactory
   Joueur createJoueur();
 
   /**
+   * Returns a new object of class '<em>Connaissance</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Connaissance</em>'.
+   * @generated
+   */
+  Connaissance createConnaissance();
+
+  /**
    * Returns a new object of class '<em>Objet</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

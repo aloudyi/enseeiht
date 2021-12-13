@@ -67,6 +67,7 @@ public class ENIGMAFactoryImpl extends EFactoryImpl implements ENIGMAFactory
     {
       case ENIGMAPackage.JEU: return createJeu();
       case ENIGMAPackage.JOUEUR: return createJoueur();
+      case ENIGMAPackage.CONNAISSANCE: return createConnaissance();
       case ENIGMAPackage.OBJET: return createObjet();
       case ENIGMAPackage.TERRITOIRE: return createTerritoire();
       case ENIGMAPackage.CHOIX: return createChoix();
@@ -104,6 +105,18 @@ public class ENIGMAFactoryImpl extends EFactoryImpl implements ENIGMAFactory
   {
     JoueurImpl joueur = new JoueurImpl();
     return joueur;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public Connaissance createConnaissance()
+  {
+    ConnaissanceImpl connaissance = new ConnaissanceImpl();
+    return connaissance;
   }
 
   /**

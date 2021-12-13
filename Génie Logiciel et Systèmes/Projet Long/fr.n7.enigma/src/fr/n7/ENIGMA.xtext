@@ -10,9 +10,15 @@ Jeu :
 Joueur :
 	'joueur' name = ID '{'
 		'objets' '{'
-			objet += Objet*
+			objets += Objet*
+		'}'
+		'conaissances' '{'
+			connaissances += Connaissance*
 		'}'
 	'}';
+
+Connaissance:
+	'conaissance' name = ID;
 Objet :
 	'objet' name = ID 'de' 'taille' taille = INT;
 

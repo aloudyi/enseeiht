@@ -123,13 +123,22 @@ public interface ENIGMAPackage extends EPackage
   int JOUEUR__NAME = 0;
 
   /**
-   * The feature id for the '<em><b>Objet</b></em>' containment reference list.
+   * The feature id for the '<em><b>Objets</b></em>' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int JOUEUR__OBJET = 1;
+  int JOUEUR__OBJETS = 1;
+
+  /**
+   * The feature id for the '<em><b>Connaissances</b></em>' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int JOUEUR__CONNAISSANCES = 2;
 
   /**
    * The number of structural features of the '<em>Joueur</em>' class.
@@ -138,7 +147,35 @@ public interface ENIGMAPackage extends EPackage
    * @generated
    * @ordered
    */
-  int JOUEUR_FEATURE_COUNT = 2;
+  int JOUEUR_FEATURE_COUNT = 3;
+
+  /**
+   * The meta object id for the '{@link fr.n7.eNIGMA.impl.ConnaissanceImpl <em>Connaissance</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.n7.eNIGMA.impl.ConnaissanceImpl
+   * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getConnaissance()
+   * @generated
+   */
+  int CONNAISSANCE = 2;
+
+  /**
+   * The feature id for the '<em><b>Name</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int CONNAISSANCE__NAME = 0;
+
+  /**
+   * The number of structural features of the '<em>Connaissance</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int CONNAISSANCE_FEATURE_COUNT = 1;
 
   /**
    * The meta object id for the '{@link fr.n7.eNIGMA.impl.ObjetImpl <em>Objet</em>}' class.
@@ -148,7 +185,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getObjet()
    * @generated
    */
-  int OBJET = 2;
+  int OBJET = 3;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -185,7 +222,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getTerritoire()
    * @generated
    */
-  int TERRITOIRE = 3;
+  int TERRITOIRE = 4;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -240,7 +277,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getChoix()
    * @generated
    */
-  int CHOIX = 4;
+  int CHOIX = 5;
 
   /**
    * The feature id for the '<em><b>Reponses</b></em>' containment reference list.
@@ -268,7 +305,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getInteraction()
    * @generated
    */
-  int INTERACTION = 5;
+  int INTERACTION = 6;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -305,7 +342,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getPersonne()
    * @generated
    */
-  int PERSONNE = 6;
+  int PERSONNE = 7;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -351,7 +388,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getLieu()
    * @generated
    */
-  int LIEU = 7;
+  int LIEU = 8;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -388,7 +425,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getChemin()
    * @generated
    */
-  int CHEMIN = 8;
+  int CHEMIN = 9;
 
   /**
    * The feature id for the '<em><b>Precedent</b></em>' reference.
@@ -425,7 +462,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getQualification()
    * @generated
    */
-  int QUALIFICATION = 9;
+  int QUALIFICATION = 10;
 
   /**
    * The feature id for the '<em><b>Qualification</b></em>' attribute.
@@ -453,7 +490,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getAction()
    * @generated
    */
-  int ACTION = 10;
+  int ACTION = 11;
 
   /**
    * The feature id for the '<em><b>Texte</b></em>' attribute.
@@ -481,7 +518,7 @@ public interface ENIGMAPackage extends EPackage
    * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getReponse()
    * @generated
    */
-  int REPONSE = 11;
+  int REPONSE = 12;
 
   /**
    * The feature id for the '<em><b>Texte</b></em>' containment reference.
@@ -576,15 +613,47 @@ public interface ENIGMAPackage extends EPackage
   EAttribute getJoueur_Name();
 
   /**
-   * Returns the meta object for the containment reference list '{@link fr.n7.eNIGMA.Joueur#getObjet <em>Objet</em>}'.
+   * Returns the meta object for the containment reference list '{@link fr.n7.eNIGMA.Joueur#getObjets <em>Objets</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the containment reference list '<em>Objet</em>'.
-   * @see fr.n7.eNIGMA.Joueur#getObjet()
+   * @return the meta object for the containment reference list '<em>Objets</em>'.
+   * @see fr.n7.eNIGMA.Joueur#getObjets()
    * @see #getJoueur()
    * @generated
    */
-  EReference getJoueur_Objet();
+  EReference getJoueur_Objets();
+
+  /**
+   * Returns the meta object for the containment reference list '{@link fr.n7.eNIGMA.Joueur#getConnaissances <em>Connaissances</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference list '<em>Connaissances</em>'.
+   * @see fr.n7.eNIGMA.Joueur#getConnaissances()
+   * @see #getJoueur()
+   * @generated
+   */
+  EReference getJoueur_Connaissances();
+
+  /**
+   * Returns the meta object for class '{@link fr.n7.eNIGMA.Connaissance <em>Connaissance</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Connaissance</em>'.
+   * @see fr.n7.eNIGMA.Connaissance
+   * @generated
+   */
+  EClass getConnaissance();
+
+  /**
+   * Returns the meta object for the attribute '{@link fr.n7.eNIGMA.Connaissance#getName <em>Name</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Name</em>'.
+   * @see fr.n7.eNIGMA.Connaissance#getName()
+   * @see #getConnaissance()
+   * @generated
+   */
+  EAttribute getConnaissance_Name();
 
   /**
    * Returns the meta object for class '{@link fr.n7.eNIGMA.Objet <em>Objet</em>}'.
@@ -982,12 +1051,38 @@ public interface ENIGMAPackage extends EPackage
     EAttribute JOUEUR__NAME = eINSTANCE.getJoueur_Name();
 
     /**
-     * The meta object literal for the '<em><b>Objet</b></em>' containment reference list feature.
+     * The meta object literal for the '<em><b>Objets</b></em>' containment reference list feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference JOUEUR__OBJET = eINSTANCE.getJoueur_Objet();
+    EReference JOUEUR__OBJETS = eINSTANCE.getJoueur_Objets();
+
+    /**
+     * The meta object literal for the '<em><b>Connaissances</b></em>' containment reference list feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference JOUEUR__CONNAISSANCES = eINSTANCE.getJoueur_Connaissances();
+
+    /**
+     * The meta object literal for the '{@link fr.n7.eNIGMA.impl.ConnaissanceImpl <em>Connaissance</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.n7.eNIGMA.impl.ConnaissanceImpl
+     * @see fr.n7.eNIGMA.impl.ENIGMAPackageImpl#getConnaissance()
+     * @generated
+     */
+    EClass CONNAISSANCE = eINSTANCE.getConnaissance();
+
+    /**
+     * The meta object literal for the '<em><b>Name</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute CONNAISSANCE__NAME = eINSTANCE.getConnaissance_Name();
 
     /**
      * The meta object literal for the '{@link fr.n7.eNIGMA.impl.ObjetImpl <em>Objet</em>}' class.

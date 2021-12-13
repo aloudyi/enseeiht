@@ -17,7 +17,8 @@ import org.eclipse.emf.ecore.EObject;
  * </p>
  * <ul>
  *   <li>{@link fr.n7.eNIGMA.Joueur#getName <em>Name</em>}</li>
- *   <li>{@link fr.n7.eNIGMA.Joueur#getObjet <em>Objet</em>}</li>
+ *   <li>{@link fr.n7.eNIGMA.Joueur#getObjets <em>Objets</em>}</li>
+ *   <li>{@link fr.n7.eNIGMA.Joueur#getConnaissances <em>Connaissances</em>}</li>
  * </ul>
  *
  * @see fr.n7.eNIGMA.ENIGMAPackage#getJoueur()
@@ -49,15 +50,27 @@ public interface Joueur extends EObject
   void setName(String value);
 
   /**
-   * Returns the value of the '<em><b>Objet</b></em>' containment reference list.
+   * Returns the value of the '<em><b>Objets</b></em>' containment reference list.
    * The list contents are of type {@link fr.n7.eNIGMA.Objet}.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the value of the '<em>Objet</em>' containment reference list.
-   * @see fr.n7.eNIGMA.ENIGMAPackage#getJoueur_Objet()
+   * @return the value of the '<em>Objets</em>' containment reference list.
+   * @see fr.n7.eNIGMA.ENIGMAPackage#getJoueur_Objets()
    * @model containment="true"
    * @generated
    */
-  EList<Objet> getObjet();
+  EList<Objet> getObjets();
+
+  /**
+   * Returns the value of the '<em><b>Connaissances</b></em>' containment reference list.
+   * The list contents are of type {@link fr.n7.eNIGMA.Connaissance}.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the value of the '<em>Connaissances</em>' containment reference list.
+   * @see fr.n7.eNIGMA.ENIGMAPackage#getJoueur_Connaissances()
+   * @model containment="true"
+   * @generated
+   */
+  EList<Connaissance> getConnaissances();
 
 } // Joueur

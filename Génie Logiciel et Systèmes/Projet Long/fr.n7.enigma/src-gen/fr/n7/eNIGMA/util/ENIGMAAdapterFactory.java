@@ -86,6 +86,11 @@ public class ENIGMAAdapterFactory extends AdapterFactoryImpl
         return createJoueurAdapter();
       }
       @Override
+      public Adapter caseConnaissance(Connaissance object)
+      {
+        return createConnaissanceAdapter();
+      }
+      @Override
       public Adapter caseObjet(Objet object)
       {
         return createObjetAdapter();
@@ -183,6 +188,21 @@ public class ENIGMAAdapterFactory extends AdapterFactoryImpl
    * @generated
    */
   public Adapter createJoueurAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.n7.eNIGMA.Connaissance <em>Connaissance</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.n7.eNIGMA.Connaissance
+   * @generated
+   */
+  public Adapter createConnaissanceAdapter()
   {
     return null;
   }

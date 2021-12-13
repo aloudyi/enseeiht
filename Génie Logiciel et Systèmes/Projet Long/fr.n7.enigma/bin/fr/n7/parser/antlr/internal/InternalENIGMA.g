@@ -200,17 +200,17 @@ ruleJoueur returns [EObject current=null]
 		(
 			(
 				{
-					newCompositeNode(grammarAccess.getJoueurAccess().getObjetObjetParserRuleCall_5_0());
+					newCompositeNode(grammarAccess.getJoueurAccess().getObjetsObjetParserRuleCall_5_0());
 				}
-				lv_objet_5_0=ruleObjet
+				lv_objets_5_0=ruleObjet
 				{
 					if ($current==null) {
 						$current = createModelElementForParent(grammarAccess.getJoueurRule());
 					}
 					add(
 						$current,
-						"objet",
-						lv_objet_5_0,
+						"objets",
+						lv_objets_5_0,
 						"fr.n7.ENIGMA.Objet");
 					afterParserOrEnumRuleCall();
 				}
@@ -220,10 +220,82 @@ ruleJoueur returns [EObject current=null]
 		{
 			newLeafNode(otherlv_6, grammarAccess.getJoueurAccess().getRightCurlyBracketKeyword_6());
 		}
-		otherlv_7='}'
+		otherlv_7='conaissances'
 		{
-			newLeafNode(otherlv_7, grammarAccess.getJoueurAccess().getRightCurlyBracketKeyword_7());
+			newLeafNode(otherlv_7, grammarAccess.getJoueurAccess().getConaissancesKeyword_7());
 		}
+		otherlv_8='{'
+		{
+			newLeafNode(otherlv_8, grammarAccess.getJoueurAccess().getLeftCurlyBracketKeyword_8());
+		}
+		(
+			(
+				{
+					newCompositeNode(grammarAccess.getJoueurAccess().getConnaissancesConnaissanceParserRuleCall_9_0());
+				}
+				lv_connaissances_9_0=ruleConnaissance
+				{
+					if ($current==null) {
+						$current = createModelElementForParent(grammarAccess.getJoueurRule());
+					}
+					add(
+						$current,
+						"connaissances",
+						lv_connaissances_9_0,
+						"fr.n7.ENIGMA.Connaissance");
+					afterParserOrEnumRuleCall();
+				}
+			)
+		)*
+		otherlv_10='}'
+		{
+			newLeafNode(otherlv_10, grammarAccess.getJoueurAccess().getRightCurlyBracketKeyword_10());
+		}
+		otherlv_11='}'
+		{
+			newLeafNode(otherlv_11, grammarAccess.getJoueurAccess().getRightCurlyBracketKeyword_11());
+		}
+	)
+;
+
+// Entry rule entryRuleConnaissance
+entryRuleConnaissance returns [EObject current=null]:
+	{ newCompositeNode(grammarAccess.getConnaissanceRule()); }
+	iv_ruleConnaissance=ruleConnaissance
+	{ $current=$iv_ruleConnaissance.current; }
+	EOF;
+
+// Rule Connaissance
+ruleConnaissance returns [EObject current=null]
+@init {
+	enterRule();
+}
+@after {
+	leaveRule();
+}:
+	(
+		otherlv_0='conaissance'
+		{
+			newLeafNode(otherlv_0, grammarAccess.getConnaissanceAccess().getConaissanceKeyword_0());
+		}
+		(
+			(
+				lv_name_1_0=RULE_ID
+				{
+					newLeafNode(lv_name_1_0, grammarAccess.getConnaissanceAccess().getNameIDTerminalRuleCall_1_0());
+				}
+				{
+					if ($current==null) {
+						$current = createModelElement(grammarAccess.getConnaissanceRule());
+					}
+					setWithLastConsumed(
+						$current,
+						"name",
+						lv_name_1_0,
+						"org.eclipse.xtext.common.Terminals.ID");
+				}
+			)
+		)
 	)
 ;
 

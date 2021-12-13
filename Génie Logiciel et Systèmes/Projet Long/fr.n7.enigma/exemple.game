@@ -32,5 +32,8 @@ jeu Enigme {
         objets {
             objet Tentative de taille 3
         }
+        conaissances {
+        	
+        }
     }
 }

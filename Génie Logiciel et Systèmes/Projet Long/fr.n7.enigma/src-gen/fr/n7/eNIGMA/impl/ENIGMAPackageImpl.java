@@ -6,6 +6,7 @@ package fr.n7.eNIGMA.impl;
 import fr.n7.eNIGMA.Action;
 import fr.n7.eNIGMA.Chemin;
 import fr.n7.eNIGMA.Choix;
+import fr.n7.eNIGMA.Connaissance;
 import fr.n7.eNIGMA.ENIGMAFactory;
 import fr.n7.eNIGMA.ENIGMAPackage;
 import fr.n7.eNIGMA.Interaction;
@@ -46,6 +47,13 @@ public class ENIGMAPackageImpl extends EPackageImpl implements ENIGMAPackage
    * @generated
    */
   private EClass joueurEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass connaissanceEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -252,9 +260,42 @@ public class ENIGMAPackageImpl extends EPackageImpl implements ENIGMAPackage
    * @generated
    */
   @Override
-  public EReference getJoueur_Objet()
+  public EReference getJoueur_Objets()
   {
     return (EReference)joueurEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public EReference getJoueur_Connaissances()
+  {
+    return (EReference)joueurEClass.getEStructuralFeatures().get(2);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public EClass getConnaissance()
+  {
+    return connaissanceEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  @Override
+  public EAttribute getConnaissance_Name()
+  {
+    return (EAttribute)connaissanceEClass.getEStructuralFeatures().get(0);
   }
 
   /**
@@ -625,7 +666,11 @@ public class ENIGMAPackageImpl extends EPackageImpl implements ENIGMAPackage
 
     joueurEClass = createEClass(JOUEUR);
     createEAttribute(joueurEClass, JOUEUR__NAME);
-    createEReference(joueurEClass, JOUEUR__OBJET);
+    createEReference(joueurEClass, JOUEUR__OBJETS);
+    createEReference(joueurEClass, JOUEUR__CONNAISSANCES);
+
+    connaissanceEClass = createEClass(CONNAISSANCE);
+    createEAttribute(connaissanceEClass, CONNAISSANCE__NAME);
 
     objetEClass = createEClass(OBJET);
     createEAttribute(objetEClass, OBJET__NAME);
@@ -706,7 +751,11 @@ public class ENIGMAPackageImpl extends EPackageImpl implements ENIGMAPackage
 
     initEClass(joueurEClass, Joueur.class, "Joueur", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getJoueur_Name(), ecorePackage.getEString(), "name", null, 0, 1, Joueur.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getJoueur_Objet(), this.getObjet(), null, "objet", null, 0, -1, Joueur.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getJoueur_Objets(), this.getObjet(), null, "objets", null, 0, -1, Joueur.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getJoueur_Connaissances(), this.getConnaissance(), null, "connaissances", null, 0, -1, Joueur.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(connaissanceEClass, Connaissance.class, "Connaissance", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getConnaissance_Name(), ecorePackage.getEString(), "name", null, 0, 1, Connaissance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(objetEClass, Objet.class, "Objet", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getObjet_Name(), ecorePackage.getEString(), "name", null, 0, 1, Objet.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

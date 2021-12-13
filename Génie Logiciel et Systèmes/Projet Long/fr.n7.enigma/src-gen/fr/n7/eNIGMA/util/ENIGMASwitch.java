@@ -87,6 +87,13 @@ public class ENIGMASwitch<T> extends Switch<T>
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
+      case ENIGMAPackage.CONNAISSANCE:
+      {
+        Connaissance connaissance = (Connaissance)theEObject;
+        T result = caseConnaissance(connaissance);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
       case ENIGMAPackage.OBJET:
       {
         Objet objet = (Objet)theEObject;
@@ -189,6 +196,22 @@ public class ENIGMASwitch<T> extends Switch<T>
    * @generated
    */
   public T caseJoueur(Joueur object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Connaissance</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Connaissance</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseConnaissance(Connaissance object)
   {
     return null;
   }

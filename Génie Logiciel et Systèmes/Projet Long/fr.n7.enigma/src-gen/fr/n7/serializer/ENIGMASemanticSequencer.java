@@ -6,6 +6,7 @@ package fr.n7.serializer;
 import com.google.inject.Inject;
 import fr.n7.eNIGMA.Chemin;
 import fr.n7.eNIGMA.Choix;
+import fr.n7.eNIGMA.Connaissance;
 import fr.n7.eNIGMA.ENIGMAPackage;
 import fr.n7.eNIGMA.Interaction;
 import fr.n7.eNIGMA.Jeu;
@@ -50,6 +51,9 @@ public class ENIGMASemanticSequencer extends AbstractDelegatingSemanticSequencer
 				return; 
 			case ENIGMAPackage.CHOIX:
 				sequence_Choix(context, (Choix) semanticObject); 
+				return; 
+			case ENIGMAPackage.CONNAISSANCE:
+				sequence_Connaissance(context, (Connaissance) semanticObject); 
 				return; 
 			case ENIGMAPackage.INTERACTION:
 				sequence_Interaction(context, (Interaction) semanticObject); 
@@ -136,6 +140,24 @@ public class ENIGMASemanticSequencer extends AbstractDelegatingSemanticSequencer
 	
 	/**
 	 * Contexts:
+	 *     Connaissance returns Connaissance
+	 *
+	 * Constraint:
+	 *     name=ID
+	 */
+	protected void sequence_Connaissance(ISerializationContext context, Connaissance semanticObject) {
+		if (errorAcceptor != null) {
+			if (transientValues.isValueTransient(semanticObject, ENIGMAPackage.Literals.CONNAISSANCE__NAME) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, ENIGMAPackage.Literals.CONNAISSANCE__NAME));
+		}
+		SequenceFeeder feeder = createSequencerFeeder(context, semanticObject);
+		feeder.accept(grammarAccess.getConnaissanceAccess().getNameIDTerminalRuleCall_1_0(), semanticObject.getName());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Contexts:
 	 *     Interaction returns Interaction
 	 *
 	 * Constraint:
@@ -175,7 +197,7 @@ public class ENIGMASemanticSequencer extends AbstractDelegatingSemanticSequencer
 	 *     Joueur returns Joueur
 	 *
 	 * Constraint:
-	 *     (name=ID objet+=Objet*)
+	 *     (name=ID objets+=Objet* connaissances+=Connaissance*)
 	 */
 	protected void sequence_Joueur(ISerializationContext context, Joueur semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
