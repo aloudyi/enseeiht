@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eNIGMA:Jeu
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:eNIGMA="http://www.n7.fr/ENIGMA"
+    name="Enigme">
+  <territoire
+      name="Egypte">
+    <lieuDebut
+        name="Depart">
+      <personne
+          name="Sphinx">
+        <texte
+            qualification="Quel est la capitale du Maroc ?"/>
+        <interaction
+            name="Question">
+          <choix>
+            <reponses>
+              <texte
+                  qualification="Ouarzazate"/>
+              <action
+                  texte="mauvaise"/>
+            </reponses>
+            <reponses>
+              <texte
+                  qualification="Ifrane"/>
+              <action
+                  texte="mauvaise"/>
+            </reponses>
+            <reponses>
+              <texte
+                  qualification="Ouled Taima"/>
+              <action
+                  texte="mauvaise"/>
+            </reponses>
+            <reponses>
+              <texte
+                  qualification="Rabat"/>
+              <action
+                  texte="bonne"/>
+            </reponses>
+          </choix>
+        </interaction>
+      </personne>
+    </lieuDebut>
+    <lieuxFin
+        name="Fin">
+      <personne
+          name="Final">
+        <texte
+            qualification="\n"/>
+        <interaction
+            name="finDePartie">
+          <choix>
+            <reponses>
+              <texte
+                  qualification="Voulez-vous quitter la partie ?"/>
+              <action
+                  texte="quitter"/>
+            </reponses>
+            <reponses>
+              <texte
+                  qualification="Voulez-vous rejouer la partie ?"/>
+              <action
+                  texte="rejouer"/>
+            </reponses>
+          </choix>
+        </interaction>
+      </personne>
+    </lieuxFin>
+    <chemins
+        precedent="//@territoire/@lieuDebut"
+        suivant="//@territoire/@lieuxFin.0"/>
+  </territoire>
+  <joueur name="Explorateur">
+    <objets
+        name="Tentative"
+        taille="3"/>
+    <connaissances/>
+  </joueur>
+</eNIGMA:Jeu>

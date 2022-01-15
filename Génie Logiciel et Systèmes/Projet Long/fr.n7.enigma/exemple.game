@@ -1,39 +1,141 @@
-jeu Enigme {
-    territoire Egypte {
-        debut lieu Depart {
-            personne Sphinx {
-                "Quel est la capitale du Maroc ?"
-                interaction question {
-                    choix {
-                        reponse >> "Ouarzazate" avec action "mauvaise"
-                        reponse >> "Ifrane" avec action "mauvaise"
-                        reponse >> "Ouled Taima" avec action "mauvaise"
-                        reponse >> "Rabat" avec action "bonne"
-                    }
-                }
-            }
+jeu Enigme {     	
+ 	condition condTentativePos {
+       obj { 
+       		objet Tentative occurrence 1, de taille 1 etat visible possede
+       }
+       con {
+       		Reussite
+       }
+ 	}
+ 	condition condZeroTentative {
+       obj { 
+       		objet Tentative occurrence 0, de taille 1 etat visible possede
+       }
+       con {
+       		Reussite
+       }
+ 	}
+
+    condition condReussite {
+       obj { 
+       		objet Tentative occurrence 1, de taille 1 etat visible possede
+       }
+       con {
+       		Reussite
+       }
+ 	}
+	territoire Egypte {
+       depart lieu Depart {
+            personnes {
+            	personne Sphinx obligatoire condTentativePos visible condTentativePos {
+                	"Quel est la capitale du Maroc ?"
+                	interaction question {
+                    	choix choiceID {
+                        	reponse >> ab de qualification "Ouarzazate" avec mauvaiseReponse
+                        	reponse >> bb de qualification "Ifrane" avec mauvaiseReponse
+                        	reponse >> cb de qualification "Casablance" avec mauvaiseReponse
+                        	reponse >> db de qualification "bonne" avec bonneReponse
+                    		
+                    		conditions {
+                    			condZeroTentative
+								condReussite
+                    		}
+                    	}
+                    	choix choixFin {
+		                    reponse >> ab de qualification "quitter" avec quitter
+		                    reponse >> bb de qualification "rejouer" avec rejouer
+		                    	
+		                    conditions {}
+		                }
+                	}
+            	}
+        	}
         }
-        fin lieu Fin {
-            personne Final {
-	            "\n"
-	            interaction finDePartie {
-	                choix {
-	                    reponse >> "Quitter la partie ?" avec action "quitter"
-	                    reponse >> "Rejouer ?" avec action "rejouer"
-	                }
-	            }  
+        milieu {}
+        fin {
+        	lieu Succes {
+	        	personnes {
+	            	personne FinalSucces obligatoire condReussite visible condReussite {
+		            	"Vous avez gagné !"
+		            	interaction finDePartie {
+		                	choix reponses {
+		                    	reponse >> ab de qualification "quitter" avec quitter
+		                    	reponse >> bb de qualification "rejouer" avec rejouer
+		                    	
+		                    	conditions {}
+		                	}
+		                	choix reponses {
+		                    	reponse >> ab de qualification "quitter" avec quitter
+		                    	reponse >> bb de qualification "rejouer" avec rejouer
+		                    	
+		                    	conditions {}
+		                	}
+		            	}  
+	        		}
+	        	}
+        	}
+        	
+        	lieu Echec {
+	        	personnes {
+	            	personne FinalEchec obligatoire condZeroTentative visible condZeroTentative {
+		            	"Vous avez perdu !"
+		            	interaction finDePartie {
+		                	choix reponses {
+		                    	reponse >> ab de qualification "quitter" avec quitter
+		                    	reponse >> bb de qualification "rejouer" avec rejouer
+		                    	
+		                    	conditions {}
+		                	}
+		                	choix reponses {
+		                    	reponse >> ab de qualification "quitter" avec quitter
+		                    	reponse >> bb de qualification "rejouer" avec rejouer
+		                    	
+		                    	conditions {}
+		                	}
+		            	}  
+	        		}
+	        	}
         	}
         }
         chemins {
-            chemin de Depart a Fin
+            chemin ferme condReussite nobligatoire condReussite nvisible condReussite de Depart a Succes
+            chemin ferme condReussite nobligatoire condReussite nvisible condReussite de Depart a Echec
         }
     }
+
     joueur Moi {
+    	limite 10
         objets {
-            objet Tentative de taille 3
+            objet Tentative occurrence 3, de taille 1 etat visible possede
         }
-        conaissances {
-        	
-        }
+        connaissances {}
     }
+    
+    connaissance Reussite "Connaissance du Lieu Réussite" etat visible possede
+ 	
+ 	action mauvaiseReponse {
+    	objets c {
+    		objet Tentative occurrence 1, de taille 1  etat visible possede
+    	}
+    	objets a {}
+    	connaissances a {}
+    }
+    action bonneReponse {
+    	objets c {}
+    	objets a {}
+    	connaissances a {
+    		Reussite
+    	}
+    }    	
+    action quitter {
+    	objets c {}
+    	objets a {}
+    	connaissances a {}
+    }    	
+    action rejouer {
+    	objets c {}
+    	objets a {}
+    	connaissances a {}
+    }	 
+
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/fr.n7.enigma.feature_1.0.0.202112132259.jar" id="fr.n7.enigma.feature" version="1.0.0.202112132259">
+   <feature url="features/fr.n7.enigme.featurekhbza_1.0.0.202112311712.jar" id="fr.n7.enigme.featurekhbza" version="1.0.0.202112311712">
       <category name="Enigma"/>
    </feature>
    <category-def name="Enigma" label="Enigma Category"/>

@@ -5,7 +5,6 @@ package fr.n7.tests;
 
 import com.google.inject.Inject;
 import fr.n7.eNIGMA.Jeu;
-import fr.n7.tests.ENIGMAInjectorProvider;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtend2.lib.StringConcatenation;

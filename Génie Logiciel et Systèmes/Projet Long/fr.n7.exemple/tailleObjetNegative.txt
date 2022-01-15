@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eNIGMA:Jeu
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:eNIGMA="http://www.n7.fr/ENIGMA">
+  <territoire>
+    <lieuDebut
+        name="khbza"/>
+  </territoire>
+  <joueur name="Moi"
+      limite="5">
+    <objets
+        name="Tentative"
+        taille="-1"/>
+  </joueur>
+</eNIGMA:Jeu>

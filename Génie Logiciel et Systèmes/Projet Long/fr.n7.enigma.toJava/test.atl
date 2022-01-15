@@ -1,0 +1,229 @@
+module enigmetopetrinet;
+create OUT : petrinet from IN : ENIGME;
+	
+helper context ENIGME!JeuElement
+def: getJeu(): ENIGME!Jeu =
+	ENIGME!Jeu.allInstances()
+		->select(p | true)
+		->asSequence()->first();
+
+helper context ENIGME!Objet
+def: getJoueur(): ENIGME!Joueur =
+	ENIGME!Joueur.allInstances()
+		->select(p | p.objets->includes(self))
+		->asSequence()->first();
+
+helper context ENIGME!Personne 
+def: getLieu(): ENIGME!Lieu =
+	ENIGME!Lieu.allInstances()
+		->select(p | p.personne = self)
+		->asSequence()->first();
+	
+
+helper context ENIGME!Interaction 
+def: getPersonne(): ENIGME!Personne =
+	ENIGME!Personne.allInstances()
+		->select(p | p.interaction = self)
+		->asSequence()->first();
+
+
+helper context ENIGME!Choix 
+def: getInteraction(): ENIGME!Interaction =
+	ENIGME!Interaction.allInstances()
+		->select(p | p.choix->includes(self))
+		->asSequence()->first();
+
+
+helper context ENIGME!Reponse 
+def: getChoix(): ENIGME!Choix =
+	ENIGME!Choix.allInstances()
+		->select(p | p.reponses->includes(self))
+		->asSequence()->first();
+
+helper context ENIGME!Lieu
+def: getLieuDepart(): ENIGME!Lieu =
+	ENIGME!Territoire.allInstances()->select(p | true)->asSequence()->first().lieuDebut;
+
+-- Traduire un Process en un PetriNet de même nom
+rule Jeu2PetriNet {
+	from p: ENIGME!Jeu
+	to pn: petrinet!Petri (name <- p.name)
+}
+
+rule Object2PetriNet {
+	from o: ENIGME!Objet
+	to 
+		p_objet: petrinet!Place(
+				name <- o.name,
+				Jettons <- o.taille,
+				net <- o.getJeu()),
+		p_visible: petrinet!Place(
+				name <- o.name+'_visiblite',
+				Jettons <- if (o.etat.toString() = 'visible') then 1 else 0 endif,
+				net <- o.getJeu())
+}
+
+rule Lieu2PetriNet {
+	from l:ENIGME!Lieu
+	to
+          place_lieu: petrinet!Place(
+				name <- l.name,
+				Jettons <- if (l.getLieuDepart()= l) then 1 else 0 endif,
+				net <- l.getJeu())
+}
+
+
+rule Chemin2PetriNet {
+	from c:ENIGME!Chemin
+	to
+		tr_chemin_lieux: petrinet!Transition(
+				name <- 'tr_'+c.precedent.name+'_'+c.suivant.name,
+			    net <- c.getJeu()),
+        arc_chemin_precedent: petrinet!Arc(
+          	 	poids <- 1,
+				Source <-thisModule.resolveTemp(c.precedent,'place_lieu'),
+				Destination <-tr_chemin_lieux,
+				net <- c.getJeu()),
+		arc_chemin_suivant : petrinet!Arc(
+				poids <- 1,
+				Source <- tr_chemin_lieux,
+				Destination <-thisModule.resolveTemp(c.suivant,'place_lieu'),
+				net <- c.getJeu()),
+		place_visible: petrinet!Place(
+				name <- 'p_chemin_'+c.precedent.name+'_'+ c.suivant.name+'_visibilite',
+				Jettons <- if (c.etatvi.toString() = 'visible') then 1 else 0 endif,
+				net <- c.getJeu()),
+		place_obligatoire: petrinet!Place(
+				name <- 'p_chemin_'+c.precedent.name+'_'+ c.suivant.name+'_obligation',
+				Jettons <- if (c.etatob.toString() = 'obligatoire') then 1 else 0 endif,
+				net <- c.getJeu()),
+		place_ouvert: petrinet!Place(
+				name <- 'p_chemin_'+c.precedent.name+'_'+ c.suivant.name+'_ouvert',
+				Jettons <- if (c.etatch.toString() = 'ouvert') then 1 else 0 endif,
+				net <- c.getJeu()),
+		arc_visible : petrinet!Arc(
+				poids <- 1,
+				Source <- place_visible,
+				Destination <-tr_chemin_lieux,
+				net <- c.getJeu()),
+		arc_obligatoire : petrinet!Arc(
+				poids <- 1,
+				Source <-place_obligatoire,
+				Destination <-tr_chemin_lieux,
+				net <- c.getJeu()),
+		arc_ouvert : petrinet!Arc(
+				poids <- 1,
+				Source <-place_ouvert,
+				Destination <-tr_chemin_lieux,
+				net <- c.getJeu())
+}
+
+rule Personne2PetriNet {
+	from p:ENIGME!Personne
+	to 
+		place_personne: petrinet!Place(
+				name <- p.name,
+				Jettons <- 0,
+				net <- p.getJeu()),
+		tr_lieu_personne: petrinet!Transition(
+				name <- 'tr_'+p.getLieu().name+'_'+p.name,
+			    net <- p.getJeu()),
+		arc_lieu_personne1 : petrinet!Arc(
+				poids <- 1,
+				Source <-thisModule.resolveTemp(p.getLieu(),'place_lieu'),
+				Destination <-tr_lieu_personne,
+				net <- p.getJeu()),
+		arc_lieu_personne2 : petrinet!Arc(
+				poids <- 1,
+				Source <-tr_lieu_personne,
+				Destination <-place_personne,
+				net <- p.getJeu()),
+		place_visible: petrinet!Place(
+				name <- 'p_'+p.name+'_visibilite',
+				Jettons <- if (p.etatvi.toString() = 'visible') then 1 else 0 endif,
+				net <- p.getJeu()),
+		place_obligatoire: petrinet!Place(
+				name <- 'p_'+p.name+'_obligation',
+				Jettons <- if (p.etatob.toString() = 'obligatoire') then 1 else 0 endif,
+				net <- p.getJeu()),
+		arc_visible : petrinet!Arc(
+				poids <- 1,
+				Source <- place_visible,
+				Destination <-tr_lieu_personne,
+				net <- p.getJeu()),
+		arc_obligatoire : petrinet!Arc(
+				poids <- 1,
+				Source <-place_obligatoire,
+				Destination <-tr_lieu_personne,
+				net <- p.getJeu())
+		
+}
+
+
+rule Interaction2PetriNet {
+	from i:ENIGME!Interaction
+	to 
+		place_interaction: petrinet!Place(
+				name <- i.name,
+				Jettons <- 0,
+				net <- i.getJeu()),
+		tr_personne_interaction: petrinet!Transition(
+				name <- 'tr_'+i.getPersonne().name+'_'+i.name,
+			    net <- i.getJeu()),
+		arc_personne_interaction1 : petrinet!Arc(
+				poids <- 1,
+				Source <-thisModule.resolveTemp(i.getPersonne(),'place_personne'),
+				Destination <-tr_personne_interaction,
+				net <- i.getJeu()),
+		arc_personne_interaction2 : petrinet!Arc(
+				poids <- 1,
+				Source <-tr_personne_interaction,
+				Destination <-place_interaction,
+				net <- i.getJeu())
+}
+
+
+rule Choix2PetriNet {
+	from c:ENIGME!Choix
+	to 
+		place_choix: petrinet!Place(
+				name <- c.name,
+				Jettons <- 0,
+				net <- c.getJeu()),
+		tr_interaction_choix: petrinet!Transition(
+				name <- 'tr_'+c.getInteraction().name+'_'+c.name,
+			    net <- c.getJeu()),
+		arc_interaction_choix1 : petrinet!Arc(
+				poids <- 1,
+				Source <-thisModule.resolveTemp(c.getInteraction(),'place_interaction'),
+				Destination <-tr_interaction_choix,
+				net <- c.getJeu()),
+		arc_interaction_choix2 : petrinet!Arc(
+				poids <- 1,
+				Source <-tr_interaction_choix,
+				Destination <-place_choix,
+				net <- c.getJeu())
+}
+
+
+rule Reponse2PetriNet {
+	from a:ENIGME!Reponse
+	to 
+		place_reponse: petrinet!Place(
+				name <- a.name,
+				Jettons <- 0,
+				net <- a.getJeu()),
+		tr_choix_reponse: petrinet!Transition(
+				name <- 'tr_'+a.getChoix().name+'_'+a.name,
+			    net <- a.getJeu()),
+		arc_choix_reponse1 : petrinet!Arc(
+				poids <- 1,
+				Source <-thisModule.resolveTemp(a.getChoix(),'place_choix'),
+				Destination <-tr_choix_reponse,
+				net <- a.getJeu()),
+		arc_choix_reponse2 : petrinet!Arc(
+				poids <- 1,
+				Source <-tr_choix_reponse,
+				Destination <- place_reponse,
+				net <- a.getJeu())
+}

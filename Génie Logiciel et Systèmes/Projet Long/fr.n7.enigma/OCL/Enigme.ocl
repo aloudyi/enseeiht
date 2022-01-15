@@ -1,0 +1,16 @@
+import '../model/generated/ENIGMA.ecore'
+
+package eNIGMA
+
+context Joueur
+inv limitePositive('limite négative'):
+	self.limite >=0
+
+inv capaciteMaxDepassee('capacité max dépassée'):
+	self.limite >= self.objets->iterate(o : Objet; sum : Integer = 0 | sum + o.taille)
+
+context Objet
+inv taillePositive('taille objet négative'):
+	self.taille >=0
+
+endpackage
