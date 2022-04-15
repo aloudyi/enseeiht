@@ -30,8 +30,8 @@ public class TestsUnitairesTakeAll {
 
 	@Before
 	public void setUp() {
-		//linda = new linda.shm.CentralizedLinda();
-         linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
+		linda = new linda.shm.CentralizedLinda();
+        // linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
 	}
 	
 	@Test

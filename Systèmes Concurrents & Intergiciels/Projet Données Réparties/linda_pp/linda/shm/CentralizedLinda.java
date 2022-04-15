@@ -148,7 +148,7 @@ public class CentralizedLinda implements Linda {
     	if (t == null) {
     		throw new NullPointerException();
     	}
-    	monitor.lock();
+    	//monitor.lock();
         try {
             startWriting();
            
@@ -161,7 +161,9 @@ public class CentralizedLinda implements Linda {
     			if(t.matches(template)){
     				// On signale toutes les conditions liées au template donné
     				for (Condition c : waitingReads.get(template)) {
-    					c.signal();
+    					monitor.lock();
+    		    		c.signal();
+    		    		monitor.unlock();
     					// On supprime la condition de la liste après l'avoir signalé
     					waitingReads.get(template).remove(c);
     				}
@@ -188,7 +190,9 @@ public class CentralizedLinda implements Linda {
     			if(t.matches(template)){
     				// On signale toutes les conditions liées au template donné
     				for (Condition c : waitingTakes.get(template)) {
+    					monitor.lock();
     					c.signal();
+    					monitor.unlock();
     					// On supprime la condition du tableau après l'avoir signalé
     					waitingTakes.get(template).remove(c);
     				}
@@ -215,14 +219,14 @@ public class CentralizedLinda implements Linda {
         } catch (InterruptedException e) {
             debug("khratWrite");
         }
-        monitor.unlock();
+       // monitor.unlock();
     }
 
     /** Returns a tuple matching the template and removes it from the tuplespace.
      * Blocks if no corresponding tuple is found. */
     public Tuple take(Tuple template) {
     	Tuple tuple = null;
-		monitor.lock();
+		//monitor.lock();
 		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
 		while (true) {
 			// Version non bloquante de take qui sera utile pour savoir si on n'a pas trouvé le template donné
@@ -236,7 +240,9 @@ public class CentralizedLinda implements Linda {
 		    	waitingTakes.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
+		    		monitor.lock();
 		    		c.await();
+		    		monitor.unlock();
 		    	}
 		    	catch (InterruptedException e) {
 		    		System.out.println("Khrat Read");
@@ -245,7 +251,7 @@ public class CentralizedLinda implements Linda {
 				break;
 			}
 		}
-		monitor.unlock();
+		//monitor.unlock();
 		return tuple;
     }
 
@@ -254,7 +260,7 @@ public class CentralizedLinda implements Linda {
     public Tuple read(Tuple template) {
     	Condition c;
     	Tuple tuple = null;
-		monitor.lock();
+		//monitor.lock();
 		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
 		while (true) {
 			// Version non bloquante de Read qui sera utile pour savoir si on n'a pas trouvé le template donné
@@ -268,7 +274,9 @@ public class CentralizedLinda implements Linda {
 		    	waitingReads.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
+		    		monitor.lock();
 		    		c.await();
+		    		monitor.unlock();
 		    	}
 		    	catch (InterruptedException e) {
 		    		System.out.println("Khrat Read");
@@ -277,7 +285,7 @@ public class CentralizedLinda implements Linda {
 				break;
 			}
 		}
-		monitor.unlock();
+		//monitor.unlock();
 		return tuple;
     }
 
