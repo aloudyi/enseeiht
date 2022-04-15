@@ -102,7 +102,7 @@ public class TestsUnitairesTryTake {
 
 	@Test(expected=NullPointerException.class)
 	public void testLectureNull() {
-		linda.tryRead(null);
+		linda.tryTake(null);
 	}
 	
 }

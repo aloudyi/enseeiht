@@ -26,6 +26,8 @@ public class TestsUnitairesReadAll {
 		fauxmotif = new Tuple(Integer.class, String.class);
 		tuple = new Tuple("hamza", 22);
 		vide = new Tuple();
+		
+		
 	}
 
 	@Before
