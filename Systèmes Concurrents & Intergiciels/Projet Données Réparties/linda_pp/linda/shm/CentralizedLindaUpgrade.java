@@ -35,7 +35,7 @@ public class CentralizedLindaUpgrade implements Linda {
     // prise en cours ?
     //private boolean currentlyTaking; 
     private int currentlyTaking;
-    private List<Tuple> beingTaken; // liste des tuples en cours de suppression de l'espace des tuples, utilisée pour pouvoir executer des take simultanement
+    private List<Tuple> beingTaken; // liste des tuples en cours de suppression de l'espace des tuples, utilisï¿½e pour pouvoir executer des take simultanement
     
     
     // nombre de lecteurs en cours
@@ -44,13 +44,13 @@ public class CentralizedLindaUpgrade implements Linda {
     private int waitingReaders;
     // nombre d'ÃƒÂ©crivains en attente
     private int waitingWriters;
-    // Les Reads bloqués selon les templates correspondant
+    // Les Reads bloquï¿½s selon les templates correspondant
     private HashMap<Tuple, BlockingQueue<Condition>> waitingReads  = new HashMap<>();
-    // Les Takes bloqués selon les templates correspondant
+    // Les Takes bloquï¿½s selon les templates correspondant
 	private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
-	// Les Reads bloqués dans les calls 
+	// Les Reads bloquï¿½s dans les calls 
 	private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
-	// Les Takes bloqués dans les calls
+	// Les Takes bloquï¿½s dans les calls
 	private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
 
     public CentralizedLindaUpgrade() {
@@ -189,54 +189,54 @@ public class CentralizedLindaUpgrade implements Linda {
             
             // PRIORITE AUX READS EN ATTENTE
             // On signale les reads en attente
-        	for(Tuple template : waitingReads.keySet()){ // On parcours tous les templates de waitingRead pour vérifier l'existence du notre
+        	for(Tuple template : waitingReads.keySet()){ // On parcours tous les templates de waitingRead pour vï¿½rifier l'existence du notre
     			if(t.matches(template)){
-    				// On signale toutes les conditions liées au template donné
+    				// On signale toutes les conditions liï¿½es au template donnï¿½
     				for (Condition c : waitingReads.get(template)) {
     					c.signal();
-    					// On supprime la condition de la liste après l'avoir signalé
+    					// On supprime la condition de la liste aprï¿½s l'avoir signalï¿½
     					waitingReads.get(template).remove(c);
     				}
     			}
     		}
         	
         	// GESTION DES READS PROVENANT DES CALLBACK FUTURE
-        	for(Tuple template : waitingReadsOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vérifier l'existence du notre
+        	for(Tuple template : waitingReadsOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vï¿½rifier l'existence du notre
     			if(t.matches(template)){
-    				// On call tous les callbacks liés au template donné 
+    				// On call tous les callbacks liï¿½s au template donnï¿½ 
     				for(Callback call : waitingReadsOfCalls.get(template)){
     					new Thread(() -> {
     						Tuple te = read(t);
     			    		call.call(te);
     					}).start();
-    					// On supprime le callback après l'avoir callé
+    					// On supprime le callback aprï¿½s l'avoir callï¿½
     					waitingReadsOfCalls.get(template).remove(call);
     				}
     			}
     		}
         	
         	// GESTION DES TAKES 
-        	for(Tuple template : waitingTakes.keySet()){ // On parcours tous les templates de waitingRead pour vérifier l'existence du notre
+        	for(Tuple template : waitingTakes.keySet()){ // On parcours tous les templates de waitingRead pour vï¿½rifier l'existence du notre
     			if(t.matches(template)){
-    				// On signale toutes les conditions liées au template donné
+    				// On signale toutes les conditions liï¿½es au template donnï¿½
     				for (Condition c : waitingTakes.get(template)) {
     					c.signal();
-    					// On supprime la condition du tableau après l'avoir signalé
+    					// On supprime la condition du tableau aprï¿½s l'avoir signalï¿½
     					waitingTakes.get(template).remove(c);
     				}
     			}
     		}
         	
         	// GESTION DES TAKES PROVENANT DES CALLBACK FUTURE
-        	for(Tuple template : waitingTakesOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vérifier l'existence du notre
+        	for(Tuple template : waitingTakesOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vï¿½rifier l'existence du notre
     			if(t.matches(template)){
-    				// On call tous les callbacks liés au template donné 
+    				// On call tous les callbacks liï¿½s au template donnï¿½ 
     				for(Callback call : waitingTakesOfCalls.get(template)){
     					new Thread(() -> {
     						Tuple te = take(t);
     			    		call.call(te);
     					}).start();
-    					// On supprime le callback après l'avoir callé
+    					// On supprime le callback aprï¿½s l'avoir callï¿½
     					waitingTakesOfCalls.get(template).remove(call);
     				}
     			}
@@ -255,16 +255,16 @@ public class CentralizedLindaUpgrade implements Linda {
     public Tuple take(Tuple template) {
     	Tuple tuple = null;
 		monitor.lock();
-		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
+		// Boucle qui breakera dans le cas oï¿½ on trouvera le tuple correspondant ultï¿½rieurement aprï¿½s un Write
 		while (true) {
-			// Version non bloquante de take qui sera utile pour savoir si on n'a pas trouvé le template donné
+			// Version non bloquante de take qui sera utile pour savoir si on n'a pas trouvï¿½ le template donnï¿½
 			tuple = tryTake(template);
 			if (tuple == null) {
-				// On crée une condition qui sera signalée en cas d'écriture d'un motif qui match le motif en attente de lecture
+				// On crï¿½e une condition qui sera signalï¿½e en cas d'ï¿½criture d'un motif qui match le motif en attente de lecture
 				Condition c = monitor.newCondition();
-				// Si le template n'est pas présent dans la HashMap, on le crée et on lui associe une liste de conditions qui l'attendent
+				// Si le template n'est pas prï¿½sent dans la HashMap, on le crï¿½e et on lui associe une liste de conditions qui l'attendent
 				waitingTakes.putIfAbsent(template, new ArrayBlockingQueue<>(1000000, true));
-				// On ajoute la condition à la liste de conditions du template donné
+				// On ajoute la condition ï¿½ la liste de conditions du template donnï¿½
 		    	waitingTakes.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
@@ -287,16 +287,16 @@ public class CentralizedLindaUpgrade implements Linda {
     	Condition c;
     	Tuple tuple = null;
 		monitor.lock();
-		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
+		// Boucle qui breakera dans le cas oï¿½ on trouvera le tuple correspondant ultï¿½rieurement aprï¿½s un Write
 		while (true) {
-			// Version non bloquante de Read qui sera utile pour savoir si on n'a pas trouvé le template donné
+			// Version non bloquante de Read qui sera utile pour savoir si on n'a pas trouvï¿½ le template donnï¿½
 			tuple = tryRead(template);
 			if (tuple == null) {
-				// On crée une condition qui sera signalée en cas d'écriture d'un motif qui match le motif en attente de lecture
+				// On crï¿½e une condition qui sera signalï¿½e en cas d'ï¿½criture d'un motif qui match le motif en attente de lecture
 				c = monitor.newCondition();
-				// Si le template n'est pas présent dans la HashMap, on le crée et on lui associe une liste de conditions qui l'attendent
+				// Si le template n'est pas prï¿½sent dans la HashMap, on le crï¿½e et on lui associe une liste de conditions qui l'attendent
 				waitingReads.putIfAbsent(template, new ArrayBlockingQueue<>(1000000, true));
-				// On ajoute la condition à la liste de conditions du template donné
+				// On ajoute la condition ï¿½ la liste de conditions du template donnï¿½
 		    	waitingReads.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
@@ -322,7 +322,7 @@ public class CentralizedLindaUpgrade implements Linda {
     }
 
     public Tuple tryTake(Tuple template) {
-    	// Dans le cas où le template est nul on renvoie une exception
+    	// Dans le cas oï¿½ le template est nul on renvoie une exception
     	if (template == null) {
     		throw new NullPointerException();
     	}
@@ -420,19 +420,53 @@ public class CentralizedLindaUpgrade implements Linda {
     }
 
 
-    /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
+       /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
         int indexOfTemplate = -1;
-    	for(Tuple t : tupleSpace) {
-            if(t.matches(template)) {
-                indexOfTemplate = tupleSpace.indexOf(t);
-            }
-        }
+		int result = -1;
+		int nbThreads = this.n;
+		int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
+		int allThreadsFinished = 0;
+		for(int i =0; i<nbThreads; i++){
+			int offset0 = batchSize*i;
+			int offset1 =batchSize*(nbThreads-1-i);
+			// On crÃ©e la sous-division i
+			List<Tuple> tupleBatch = tupleSpace.subList(0+offset0, tupleSpace.size()-offset1);
+			// Un thread s'occupe alors de parcourir cette partie de l'espace
+			new Thread() {
+				public void run() {
+					if(indexOfTemplate==-1){
+						result = indexOfTemplateElementary(tupleBatch,template);
+						allThreadsFinished++; // On incrÃ©mente un compteur
+					} else {
+						if(result!=-1){
+							indexOfTemplate = result+offset0;
+						}
+					}
+				}
+			}.start();
+		}
+		// Tant que l'indice n'est pas trouvÃ© ET qu'on n'a pas parcouru toutes les sous-divisions on attend
+		while((indexOfTemplate==-1) && (allThreadsFinished!=nbThreads)){
+			// wait
+		}
         return indexOfTemplate;
     }
 
+	// Renvoie l'indice
+	public int indexOfTemplateElementary(List<Tuple> tupleSpace, Tuple template){
+		int indexOfTemplate = -1;
+		for(Tuple t : tupleSpace) {
+			if(t.matches(template)) {
+				indexOfTemplate = tupleSpace.indexOf(t);
+				break;
+			}
+		}
+		return indexOfTemplate;
+	}
+    
 	@Override
     public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
 		new Thread(() -> {
