@@ -425,13 +425,13 @@ public class CentralizedLindaUpgrade implements Linda {
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
         int indexOfTemplate = -1;
-		int result = -1;
 		int nbThreads = this.n;
 		int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
 		int allThreadsFinished = 0;
 		for(int i =0; i<nbThreads; i++){
+			int result = -1;
 			int offset0 = batchSize*i;
-			int offset1 =batchSize*(nbThreads-1-i);
+			int offset1 = batchSize*(nbThreads-1-i);
 			// On crée la sous-division i
 			List<Tuple> tupleBatch = tupleSpace.subList(0+offset0, tupleSpace.size()-offset1);
 			// Un thread s'occupe alors de parcourir cette partie de l'espace
@@ -443,6 +443,7 @@ public class CentralizedLindaUpgrade implements Linda {
 					} else {
 						if(result!=-1){
 							indexOfTemplate = result+offset0;
+							result = -1;
 						}
 					}
 				}
