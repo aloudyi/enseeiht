@@ -463,8 +463,8 @@ public class CentralizedLindaUpgrade implements Linda {
 							indexOfTemplate = result+offset0;
 							result = -1;
 						}
-						allThreadsFinished++; // On incrémente un compteur
 					}
+					allThreadsFinished++; // On incrémente un compteur
 				}
 			}.start();
 		}
