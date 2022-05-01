@@ -428,23 +428,42 @@ public class CentralizedLindaUpgrade implements Linda {
 		int nbThreads = this.n;
 		int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
 		int allThreadsFinished = 0;
-		for(int i =0; i<nbThreads; i++){
+	     	// Thread qui gère le reste :
+	    	int result = -1;
+		int offset0 = batchSize*(nbThreads-1);
+		int offset1 = tupleSpace.size();
+		// On crée la sous-division i
+	    	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+		// Un thread s'occupe alors de parcourir cette partie de l'espace
+		new Thread() {
+			public void run() {
+				if(indexOfTemplate==-1){
+					result = indexOfTemplateElementary(tupleBatch,template);
+					if(result!=-1){
+						indexOfTemplate = result+offset0;
+						result = -1;
+					}
+					allThreadsFinished++; // On incrémente un compteur
+				}
+			}
+		}.start();
+	    
+		for(int i =1; i<nbThreads; i++){
 			int result = -1;
-			int offset0 = batchSize*i;
-			int offset1 = batchSize*(nbThreads-1-i);
+			int offset0 = batchSize*(i-1);
+			int offset1 = batchSize*i;
 			// On crée la sous-division i
-			List<Tuple> tupleBatch = tupleSpace.subList(0+offset0, tupleSpace.size()-offset1);
+			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 			// Un thread s'occupe alors de parcourir cette partie de l'espace
 			new Thread() {
 				public void run() {
 					if(indexOfTemplate==-1){
 						result = indexOfTemplateElementary(tupleBatch,template);
-						allThreadsFinished++; // On incrémente un compteur
-					} else {
 						if(result!=-1){
 							indexOfTemplate = result+offset0;
 							result = -1;
 						}
+						allThreadsFinished++; // On incrémente un compteur
 					}
 				}
 			}.start();
