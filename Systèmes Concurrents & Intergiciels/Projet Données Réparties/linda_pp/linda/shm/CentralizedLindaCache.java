@@ -49,13 +49,15 @@ public class CentralizedLindaCache implements LindaCache {
     // Les Reads bloqués selon les templates correspondant
     private HashMap<Tuple, BlockingQueue<Condition>> waitingReads  = new HashMap<>();
     // Les Takes bloqués selon les templates correspondant
-	private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
-	// Les Reads bloqués dans les calls 
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
-	// Les Takes bloqués dans les calls
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
+    private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
+    // Les Reads bloqués dans les calls 
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
+    // Les Takes bloqués dans les calls
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
+    // nombre de thread pour le parcours parallele de l'espace des tuples 	
+    private int n;
 
-    public CentralizedLindaCache() {
+    public CentralizedLindaCache(int n ) {
 
         monitor = new ReentrantLock();
         readPossible = monitor.newCondition();
@@ -67,6 +69,7 @@ public class CentralizedLindaCache implements LindaCache {
         waitingReaders = 0;
         waitingWriters = 0;
         tupleSpace = new ArrayList<>();
+	this.n = n;
         takeCB=new HashMap<Tuple,List<Callback>>();
 
     }
@@ -326,7 +329,7 @@ public class CentralizedLindaCache implements LindaCache {
     	Tuple tuple = null;
         int indexOfTemplate = -1;
         try {
-            startTaking(template);
+            startTaking();
             indexOfTemplate = indexOfTemplate(tupleSpace, template);
             if(indexOfTemplate != -1) {
             	tuple = tupleSpace.get(indexOfTemplate);
@@ -340,7 +343,7 @@ public class CentralizedLindaCache implements LindaCache {
     			}
     			takeCB.remove(tuple);
             }
-            finishTaking(template);
+            finishTaking();
         } catch ( InterruptedException e) {
             debug("khratTryTake");
         }
@@ -380,7 +383,7 @@ public class CentralizedLindaCache implements LindaCache {
     	}
         Collection<Tuple> collection = new ArrayList<>();
     	try {
-	    	startTaking(template);
+	    	startTaking();
 	        for(Tuple t : tupleSpace) {
 	            if(t.matches(template)) {
 	                // int indexOfTuple = tupleSpace.indexOf(t);
@@ -389,7 +392,7 @@ public class CentralizedLindaCache implements LindaCache {
 	            }
 	        }
 	        tupleSpace.removeAll(collection);
-			finishTaking(template);
+		finishTaking();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
