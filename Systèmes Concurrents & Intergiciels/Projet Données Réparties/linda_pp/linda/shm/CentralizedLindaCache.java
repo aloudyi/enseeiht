@@ -436,13 +436,13 @@ public class CentralizedLindaCache implements LindaCache {
 		int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
 		int allThreadsFinished = 0;
 	     	// Thread qui gère le reste :
-	    	int result = -1;
-		int offset0 = batchSize*(nbThreads-1);
-		int offset1 = tupleSpace.size();
-		// On crée la sous-division i
-	    	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 		// Un thread s'occupe alors de parcourir cette partie de l'espace
 		new Thread() {
+			int result = -1;
+			int offset0 = batchSize*(nbThreads-1);
+			int offset1 = tupleSpace.size();
+			// On crée la sous-division i
+			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 			public void run() {
 				if(indexOfTemplate==-1){
 					result = indexOfTemplateElementary(tupleBatch,template);
@@ -456,13 +456,13 @@ public class CentralizedLindaCache implements LindaCache {
 		}.start();
 	    
 		for(int i =1; i<nbThreads; i++){
-			int result = -1;
-			int offset0 = batchSize*(i-1);
-			int offset1 = batchSize*i;
-			// On crée la sous-division i
-			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 			// Un thread s'occupe alors de parcourir cette partie de l'espace
 			new Thread() {
+				int result = -1;
+				int offset0 = batchSize*(i-1);
+				int offset1 = batchSize*i;
+				// On crée la sous-division i
+				List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 				public void run() {
 					if(indexOfTemplate==-1){
 						result = indexOfTemplateElementary(tupleBatch,template);
