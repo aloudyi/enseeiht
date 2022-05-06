@@ -432,7 +432,7 @@ public class CentralizedLindaCache implements LindaCache {
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
-        	public volatile int indexOfTemplate = -1;
+        	volatile int indexOfTemplate = -1;
 		int nbThreads = this.n;
 		int batchSize = (int) Math.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
 		int allThreadsFinished = 0;
