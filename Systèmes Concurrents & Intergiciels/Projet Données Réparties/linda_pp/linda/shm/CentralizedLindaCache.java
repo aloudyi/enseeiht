@@ -424,19 +424,72 @@ public class CentralizedLindaCache implements LindaCache {
         return collection;
     }
 
-
-    /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
+      /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
         int indexOfTemplate = -1;
-    	for(Tuple t : tupleSpace) {
-            if(t.matches(template)) {
-                indexOfTemplate = tupleSpace.indexOf(t);
-            }
-        }
+		int nbThreads = this.n;
+		int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
+		int allThreadsFinished = 0;
+	     	// Thread qui gère le reste :
+	    	int result = -1;
+		int offset0 = batchSize*(nbThreads-1);
+		int offset1 = tupleSpace.size();
+		// On crée la sous-division i
+	    	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+		// Un thread s'occupe alors de parcourir cette partie de l'espace
+		new Thread() {
+			public void run() {
+				if(indexOfTemplate==-1){
+					result = indexOfTemplateElementary(tupleBatch,template);
+					if(result!=-1){
+						indexOfTemplate = result+offset0;
+						result = -1;
+					}
+				}
+				allThreadsFinished++; // On incrémente un compteur
+			}
+		}.start();
+	    
+		for(int i =1; i<nbThreads; i++){
+			int result = -1;
+			int offset0 = batchSize*(i-1);
+			int offset1 = batchSize*i;
+			// On crée la sous-division i
+			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+			// Un thread s'occupe alors de parcourir cette partie de l'espace
+			new Thread() {
+				public void run() {
+					if(indexOfTemplate==-1){
+						result = indexOfTemplateElementary(tupleBatch,template);
+						if(result!=-1){
+							indexOfTemplate = result+offset0;
+							result = -1;
+						}
+					}
+					allThreadsFinished++; // On incrémente un compteur
+				}
+			}.start();
+		}
+		// Tant que l'indice n'est pas trouvé ET qu'on n'a pas parcouru toutes les sous-divisions on attend
+		while((indexOfTemplate==-1) && (allThreadsFinished!=nbThreads)){
+			// wait
+		}
         return indexOfTemplate;
     }
+
+	// Renvoie l'indice
+	public int indexOfTemplateElementary(List<Tuple> tupleSpace, Tuple template){
+		int indexOfTemplate = -1;
+		for(Tuple t : tupleSpace) {
+			if(t.matches(template)) {
+				indexOfTemplate = tupleSpace.indexOf(t);
+				break;
+			}
+		}
+		return indexOfTemplate;
+	}
 
     
     @Override
