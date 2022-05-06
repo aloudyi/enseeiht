@@ -57,7 +57,9 @@ public class CentralizedLindaCache implements LindaCache {
     private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
     // nombre de thread pour le parcours parallele de l'espace des tuples 	
     private int n;
-
+    
+    // indexOfTemplate volatilisé
+    public volatile int indexOfTemplate = -1;
     public CentralizedLindaCache(int n ) {
 
         monitor = new ReentrantLock();
@@ -432,7 +434,7 @@ public class CentralizedLindaCache implements LindaCache {
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
-        	volatile int indexOfTemplate = -1;
+        	this.indexOfTemplate = -1;
 		int nbThreads = this.n;
 		int batchSize = (int) Math.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
 		int allThreadsFinished = 0;
@@ -445,10 +447,10 @@ public class CentralizedLindaCache implements LindaCache {
 			// On crée la sous-division i
 		 	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
 			public void run() {
-				if(indexOfTemplate==-1){
+				if(this.indexOfTemplate==-1){
 					result = indexOfTemplateElementary(tupleBatch,template);
 					if(result!=-1){
-						indexOfTemplate = result+offset0;
+						this.indexOfTemplate = result+offset0;
 						result = -1;
 					}
 				}
@@ -468,7 +470,7 @@ public class CentralizedLindaCache implements LindaCache {
 					if(indexOfTemplate==-1){
 						result = indexOfTemplateElementary(tupleBatch,template);
 						if(result!=-1){
-							indexOfTemplate = result+offset0;
+							this.indexOfTemplate = result+offset0;
 							result = -1;
 						}
 					}
@@ -477,10 +479,10 @@ public class CentralizedLindaCache implements LindaCache {
 			}.start();
 		}
 		// Tant que l'indice n'est pas trouvé ET qu'on n'a pas parcouru toutes les sous-divisions on attend
-		while((indexOfTemplate==-1) && (allThreadsFinished!=nbThreads)){
+		while((this.indexOfTemplate==-1) && (allThreadsFinished!=nbThreads)){
 			// wait
 		}
-        return indexOfTemplate;
+        return this.indexOfTemplate;
     }
 
 	// Renvoie l'indice
