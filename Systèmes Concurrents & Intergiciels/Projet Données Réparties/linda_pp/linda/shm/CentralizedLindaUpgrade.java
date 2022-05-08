@@ -20,24 +20,14 @@ public class CentralizedLindaUpgrade implements Linda {
     // condition prise (take)
     private Condition takePossible;
     // condition Ã©criture (write)
-    private Condition writePossible;
-    
-    
-    
-    
-    // ecriture en cours ?
+    private Condition writePossible; 
+   // ecriture en cours ?
    // private boolean currentlyWriting;
     private int currentlyWriting;
-    
-    
-    
-    
     // prise en cours ?
     //private boolean currentlyTaking; 
     private int currentlyTaking;
     private List<Tuple> beingTaken; // liste des tuples en cours de suppression de l'espace des tuples, utilis�e pour pouvoir executer des take simultanement
-    
-    
     // nombre de lecteurs en cours
     private int currentReaders;
     // nombre de lecteurs en attente
@@ -47,13 +37,17 @@ public class CentralizedLindaUpgrade implements Linda {
     // Les Reads bloqu�s selon les templates correspondant
     private HashMap<Tuple, BlockingQueue<Condition>> waitingReads  = new HashMap<>();
     // Les Takes bloqu�s selon les templates correspondant
-	private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
-	// Les Reads bloqu�s dans les calls 
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
-	// Les Takes bloqu�s dans les calls
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
-
-    public CentralizedLindaUpgrade() {
+    private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
+    // Les Reads bloqu�s dans les calls 
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
+    // Les Takes bloqu�s dans les calls
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
+    // nombre de threads sur le lindaspace
+    private int n;
+    // entier de gestion des opérations parallèles dans le noyau
+    private indexOfTuple = -1;
+	
+    public CentralizedLindaUpgrade(int n) {
 
         monitor = new ReentrantLock();
         readPossible = monitor.newCondition();
@@ -66,7 +60,7 @@ public class CentralizedLindaUpgrade implements Linda {
         waitingWriters = 0;
         beingTaken =  new ArrayList<>();
         tupleSpace = new ArrayList<>();
-
+	this. n = n;
     }
 
     // Demande Lecture
@@ -420,63 +414,68 @@ public class CentralizedLindaUpgrade implements Linda {
     }
 
 
-       /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
+     /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
-        int indexOfTemplate = -1;
-	int nbThreads = this.n;
-	int batchSize = Integer.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
-	int allThreadsFinished = 0;
-	     // Thread qui gère le reste :
-	int offset0 = batchSize*(nbThreads-1);
-	int offset1 = tupleSpace.size();
-	// On crée la sous-division i
-	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
-		// Un thread s'occupe alors de parcourir cette partie de l'espace
-	new Thread() {
-		static int result = -1;
-		public void run() {
-			if(indexOfTemplate==-1){
-				result = indexOfTemplateElementary(tupleBatch,template);
-				if(result!=-1){
-					indexOfTemplate = result+offset0;
-					result = -1;
-				}
-			}
-			allThreadsFinished++; // On incrémente un compteur
+		int nbThreads = this.n;
+		int batchSize0 = tupleSpace.size();
+		if(n!=1) {
+			batchSize0 = (int) Math.floor(batchSize0/(n-1)); // Sous-division de l'espace des tuples
 		}
-	}.start();
-	    
-	for(int i =1; i<nbThreads; i++){
-			offset0 = batchSize*(i-1);
-			offset1 = batchSize*i;
-			// On crée la sous-division i
-			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+		final int batchSize = batchSize0;
+		this.allThreadsFinished = 0;
+			// Thread qui gÃ¨re le reste :
 			// Un thread s'occupe alors de parcourir cette partie de l'espace
-			new Thread() {
-				static int result = -1;
-				public void run() {
-					if(indexOfTemplate==-1){
-						result = indexOfTemplateElementary(tupleBatch,template);
-						if(result!=-1){
-							indexOfTemplate = result+offset0;
-							result = -1;
-						}
+		new Thread() {
+			int offset0 = batchSize*(nbThreads-1);
+			int offset1 = tupleSpace.size();
+			// On crÃ©e la sous-division i
+			List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+			int result = -1;
+			public void run() {
+				if(indexOfTuple==-1){
+					result = indexOfTemplateElementary(tupleBatch,template);
+					if(result!=-1){
+						indexOfTuple = result+offset0;
+						result = -1;
 					}
-					allThreadsFinished++; // On incrémente un compteur
 				}
-			}.start();
+				allThreadsFinished++; // On incrÃ©mente un compteur
+			}
+		}.start();
+			
+		for(int i =1; i<nbThreads; i++){
+				// Un thread s'occupe alors de parcourir cette partie de l'espace
+				final int j = i;
+				new Thread() {
+					int offset0 = batchSize*(j-1);
+					int offset1 = batchSize*j;
+					// On crÃ©e la sous-division i
+					List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+					int result = -1;
+
+					public void run() {
+						if(indexOfTuple==-1){
+							result = indexOfTemplateElementary(tupleBatch,template);
+							if(result!=-1){
+								indexOfTuple = result+offset0;
+								result = -1;
+							}
+						}
+						allThreadsFinished++; // On incrÃ©mente un compteur
+					}
+				}.start();
+			}
+			// Tant que l'indice n'est pas trouvÃ© ET qu'on n'a pas parcouru toutes les sous-divisions on attend
+			while((indexOfTuple==-1) && (allThreadsFinished!=nbThreads)){
+				// wait
 		}
-		// Tant que l'indice n'est pas trouvé ET qu'on n'a pas parcouru toutes les sous-divisions on attend
-		while((indexOfTemplate==-1) && (allThreadsFinished!=nbThreads)){
-			// wait
-	}
-        return indexOfTemplate;
+		return indexOfTuple;
     }
 
-	// Renvoie l'indice
-	public int indexOfTemplateElementary(List<Tuple> tupleSpace, Tuple template){
+    // Renvoie l'indice
+    public int indexOfTemplateElementary(List<Tuple> tupleSpace, Tuple template){
 		int indexOfTemplate = -1;
 		for(Tuple t : tupleSpace) {
 			if(t.matches(template)) {
@@ -485,9 +484,8 @@ public class CentralizedLindaUpgrade implements Linda {
 			}
 		}
 		return indexOfTemplate;
-	}
-    
-	@Override
+    }
+    @Override
     public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
 		new Thread(() -> {
 			try {
