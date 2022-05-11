@@ -1,8 +1,10 @@
 package linda.shm;
 
 import linda.Callback;
+
 import linda.Linda;
 import linda.Tuple;
+import linda.server.CallbackItf;
 import linda.server.LindaCache;
 import linda.Linda.eventMode;
 
@@ -11,58 +13,75 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.*;
 /** Shared memory implementation of Linda. */
-public class CentralizedLindaCache implements LindaCache {
+public class CentralizedLindaCache2 implements LindaCache {
 	// L'espace des Tuples qu'on va manipuler
     private List<Tuple> tupleSpace;
     // Mon moniteur
     private ReentrantLock monitor;
-    // condition lecture (read)\texton parcor
+    // condition lecture (read)
     private Condition readPossible;
     // condition prise (take)
     private Condition takePossible;
-    // condition ÃƒÂ©criture (write)
+    // condition ÃƒÆ’Ã‚Â©criture (write)
     private Condition writePossible;
+  //La liste des callback Ã  appeler pour un tuple
+    private HashMap<Tuple,List<Callback>> takeCB; 
+    
+    
     // ecriture en cours ?
-    private boolean currentlyWriting;
+   // private boolean currentlyWriting;
+    private int currentlyWriting;
+    
+    
+    
+    
     // prise en cours ?
-    private boolean currentlyTaking;     
+    //private boolean currentlyTaking; 
+    private boolean currentlyTaking;
+   
+    
+    
     // nombre de lecteurs en cours
     private int currentReaders;
     // nombre de lecteurs en attente
     private int waitingReaders;
-    // nombre d'ÃƒÂ©crivains en attente
+    // nombre d'ÃƒÆ’Ã‚Â©crivains en attente
     private int waitingWriters;
-    // Les Reads bloqués selon les templates correspondant
+    // Les Reads bloquÃ©s selon les templates correspondant
     private HashMap<Tuple, BlockingQueue<Condition>> waitingReads  = new HashMap<>();
-    // Les Takes bloqués selon les templates correspondant
-	private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
-	// Les Reads bloqués dans les calls 
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
-	// Les Takes bloqués dans les calls
-	private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
-	//La liste des callback Ã  appeler pour un tuple
-    private HashMap<Tuple,List<Callback>> takeCB; 
+    // Les Takes bloquÃ©s selon les templates correspondant
+    private HashMap<Tuple, BlockingQueue<Condition>> waitingTakes  = new HashMap<>();
+    // Les Reads bloquÃ©s dans les calls 
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
+    // Les Takes bloquÃ©s dans les calls
+    private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
+    // nombre de thread pour le parcours parallele de l'espace des tuples 	
+    private int n;
     
-    public CentralizedLindaCache() {
+    // indexOfTemplate volatilisÃ©
+    public volatile int indexOfTuple = -1;
+    public CentralizedLindaCache2(int n ) {
 
         monitor = new ReentrantLock();
         readPossible = monitor.newCondition();
         takePossible = monitor.newCondition();
         writePossible = monitor.newCondition();
         currentlyTaking = false;
-        currentlyWriting = false;
+        currentlyWriting = 0;
         currentReaders = 0;
         waitingReaders = 0;
         waitingWriters = 0;
         tupleSpace = new ArrayList<>();
+	this.n = n;
         takeCB=new HashMap<Tuple,List<Callback>>();
+
     }
 
     // Demande Lecture
     private void startReading() throws InterruptedException {
 
         monitor.lock();       
-        while(currentlyWriting || currentlyTaking) {
+        while(currentlyWriting>0 || currentlyTaking) {
             waitingReaders++;
             readPossible.await();
             waitingReaders--;        
@@ -72,7 +91,6 @@ public class CentralizedLindaCache implements LindaCache {
         monitor.unlock();
 
     }
-
     // Terminer Lecture
     private void finishReading() throws InterruptedException {
 
@@ -88,18 +106,22 @@ public class CentralizedLindaCache implements LindaCache {
         monitor.unlock();
 
     }
+    
+    
+    
+    
 
-    // Demander Prise
+  // Demander Prise
     private void startTaking() throws InterruptedException {
 
-        monitor.lock();
-        while(currentlyWriting || currentlyTaking || currentReaders != 0 || waitingReaders > 0 || waitingWriters > 0) {
-            takePossible.await();
-        }
-        currentlyTaking = true;
-        monitor.unlock();
-    
-    }
+	monitor.lock();
+	while(currentlyWriting>0 || currentlyTaking || currentReaders != 0 || waitingReaders > 0 || waitingWriters > 0) {
+	    takePossible.await();
+	}
+	currentlyTaking = true;
+	monitor.unlock();
+
+   }
 
     // Terminer Prise
     private void finishTaking() throws InterruptedException {
@@ -117,31 +139,32 @@ public class CentralizedLindaCache implements LindaCache {
 
     }
 
-    // Demander Prise
+   // Demander Prise
     private void startWriting() throws InterruptedException {
 
         monitor.lock();
-        while(currentlyWriting || currentlyTaking || currentReaders != 0 || waitingReaders > 0) {
+        while(currentlyTaking || currentReaders != 0 || waitingReaders > 0) {
             waitingWriters++;
             writePossible.await();
             waitingWriters--;
         }
-        currentlyWriting = true;
+        currentlyWriting++;
+        writePossible.signal();
         monitor.unlock();
     
     }
 
-    // Terminer Prise
+     // Terminer Prise
     private void finishWriting() throws InterruptedException {
 
         monitor.lock();
-        currentlyWriting = false;
-        if(waitingReaders > 0) {
-            readPossible.signal();
-        } else if(waitingWriters > 0) {
-            writePossible.signal();
-        } else {
-            takePossible.signal();
+        currentlyWriting--;
+        if(currentlyWriting == 0) {
+            if(waitingReaders > 0) {
+            	readPossible.signal();
+            } else {
+                takePossible.signal();
+            }
         }
         monitor.unlock();
 
@@ -152,7 +175,6 @@ public class CentralizedLindaCache implements LindaCache {
     	if (t == null) {
     		throw new NullPointerException();
     	}
-    	//monitor.lock();
         try {
             startWriting();
            
@@ -161,58 +183,58 @@ public class CentralizedLindaCache implements LindaCache {
             
             // PRIORITE AUX READS EN ATTENTE
             // On signale les reads en attente
-        	for(Tuple template : waitingReads.keySet()){ // On parcours tous les templates de waitingRead pour vérifier l'existence du notre
+        	for(Tuple template : waitingReads.keySet()){ // On parcours tous les templates de waitingRead pour vÃ©rifier l'existence du notre
     			if(t.matches(template)){
-    				// On signale toutes les conditions liées au template donné
+    				// On signale toutes les conditions liÃ©es au template donnÃ©
     				for (Condition c : waitingReads.get(template)) {
-    					monitor.lock();
-    		    		c.signal();
-    		    		monitor.unlock();
-    					// On supprime la condition de la liste après l'avoir signalé
+					monitor.lock();
+    					c.signal();
+					monitor.unlock();
+    					// On supprime la condition de la liste aprÃ¨s l'avoir signalÃ©
     					waitingReads.get(template).remove(c);
     				}
     			}
     		}
         	
         	// GESTION DES READS PROVENANT DES CALLBACK FUTURE
-        	for(Tuple template : waitingReadsOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vérifier l'existence du notre
+        	for(Tuple template : waitingReadsOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vÃ©rifier l'existence du notre
     			if(t.matches(template)){
-    				// On call tous les callbacks liés au template donné 
+    				// On call tous les callbacks liÃ©s au template donnÃ© 
     				for(Callback call : waitingReadsOfCalls.get(template)){
     					new Thread(() -> {
     						Tuple te = read(t);
     			    		call.call(te);
     					}).start();
-    					// On supprime le callback après l'avoir callé
+    					// On supprime le callback aprÃ¨s l'avoir callÃ©
     					waitingReadsOfCalls.get(template).remove(call);
     				}
     			}
     		}
         	
         	// GESTION DES TAKES 
-        	for(Tuple template : waitingTakes.keySet()){ // On parcours tous les templates de waitingRead pour vérifier l'existence du notre
+        	for(Tuple template : waitingTakes.keySet()){ // On parcours tous les templates de waitingRead pour vÃ©rifier l'existence du notre
     			if(t.matches(template)){
-    				// On signale toutes les conditions liées au template donné
+    				// On signale toutes les conditions liÃ©es au template donnÃ©
     				for (Condition c : waitingTakes.get(template)) {
-    					monitor.lock();
+					monitor.lock();
     					c.signal();
-    					monitor.unlock();
-    					// On supprime la condition du tableau après l'avoir signalé
+					monitor.unlock();
+    					// On supprime la condition du tableau aprÃ¨s l'avoir signalÃ©
     					waitingTakes.get(template).remove(c);
     				}
     			}
     		}
         	
         	// GESTION DES TAKES PROVENANT DES CALLBACK FUTURE
-        	for(Tuple template : waitingTakesOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vérifier l'existence du notre
+        	for(Tuple template : waitingTakesOfCalls.keySet()){ // On parcours tous les templates de waitingReadsOfCalls pour vÃ©rifier l'existence du notre
     			if(t.matches(template)){
-    				// On call tous les callbacks liés au template donné 
+    				// On call tous les callbacks liÃ©s au template donnÃ© 
     				for(Callback call : waitingTakesOfCalls.get(template)){
     					new Thread(() -> {
     						Tuple te = take(t);
     			    		call.call(te);
     					}).start();
-    					// On supprime le callback après l'avoir callé
+    					// On supprime le callback aprÃ¨s l'avoir callÃ©
     					waitingTakesOfCalls.get(template).remove(call);
     				}
     			}
@@ -223,30 +245,31 @@ public class CentralizedLindaCache implements LindaCache {
         } catch (InterruptedException e) {
             debug("khratWrite");
         }
-       // monitor.unlock();
+        
     }
 
     /** Returns a tuple matching the template and removes it from the tuplespace.
      * Blocks if no corresponding tuple is found. */
     public Tuple take(Tuple template) {
     	Tuple tuple = null;
-		//monitor.lock();
-		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
+		
+	
+		// Boucle qui breakera dans le cas oÃ¹ on trouvera le tuple correspondant ultÃ©rieurement aprÃ¨s un Write
 		while (true) {
-			// Version non bloquante de take qui sera utile pour savoir si on n'a pas trouvé le template donné
+			// Version non bloquante de take qui sera utile pour savoir si on n'a pas trouvÃ© le template donnÃ©
 			tuple = tryTake(template);
 			if (tuple == null) {
-				// On crée une condition qui sera signalée en cas d'écriture d'un motif qui match le motif en attente de lecture
+				// On crÃ©e une condition qui sera signalÃ©e en cas d'Ã©criture d'un motif qui match le motif en attente de lecture
 				Condition c = monitor.newCondition();
-				// Si le template n'est pas présent dans la HashMap, on le crée et on lui associe une liste de conditions qui l'attendent
+				// Si le template n'est pas prÃ©sent dans la HashMap, on le crÃ©e et on lui associe une liste de conditions qui l'attendent
 				waitingTakes.putIfAbsent(template, new ArrayBlockingQueue<>(1000000, true));
-				// On ajoute la condition à la liste de conditions du template donné
+				// On ajoute la condition Ã  la liste de conditions du template donnÃ©
 		    	waitingTakes.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
-		    		monitor.lock();
+				monitor.lock();
 		    		c.await();
-		    		monitor.unlock();
+				monitor.unlock();
 		    	}
 		    	catch (InterruptedException e) {
 		    		System.out.println("Khrat Read");
@@ -255,7 +278,7 @@ public class CentralizedLindaCache implements LindaCache {
 				break;
 			}
 		}
-		//monitor.unlock();
+		
 		return tuple;
     }
 
@@ -264,23 +287,23 @@ public class CentralizedLindaCache implements LindaCache {
     public Tuple read(Tuple template) {
     	Condition c;
     	Tuple tuple = null;
-		//monitor.lock();
-		// Boucle qui breakera dans le cas où on trouvera le tuple correspondant ultérieurement après un Write
+		
+		// Boucle qui breakera dans le cas oÃ¹ on trouvera le tuple correspondant ultÃ©rieurement aprÃ¨s un Write
 		while (true) {
-			// Version non bloquante de Read qui sera utile pour savoir si on n'a pas trouvé le template donné
+			// Version non bloquante de Read qui sera utile pour savoir si on n'a pas trouvÃ© le template donnÃ©
 			tuple = tryRead(template);
 			if (tuple == null) {
-				// On crée une condition qui sera signalée en cas d'écriture d'un motif qui match le motif en attente de lecture
+				// On crÃ©e une condition qui sera signalÃ©e en cas d'Ã©criture d'un motif qui match le motif en attente de lecture
 				c = monitor.newCondition();
-				// Si le template n'est pas présent dans la HashMap, on le crée et on lui associe une liste de conditions qui l'attendent
+				// Si le template n'est pas prÃ©sent dans la HashMap, on le crÃ©e et on lui associe une liste de conditions qui l'attendent
 				waitingReads.putIfAbsent(template, new ArrayBlockingQueue<>(1000000, true));
-				// On ajoute la condition à la liste de conditions du template donné
+				// On ajoute la condition Ã  la liste de conditions du template donnÃ©
 		    	waitingReads.get(template).add(c);
 		    	try {
 		    		// On wait la condition en attente du signal qui proviendra du write
-		    		monitor.lock();
+				monitor.lock();
 		    		c.await();
-		    		monitor.unlock();
+				monitor.unlock();
 		    	}
 		    	catch (InterruptedException e) {
 		    		System.out.println("Khrat Read");
@@ -289,22 +312,20 @@ public class CentralizedLindaCache implements LindaCache {
 				break;
 			}
 		}
-		//monitor.unlock();
+		
 		return tuple;
     }
 
     public void debug(String prefix) {
     	monitor.lock();
-    	try {
-        System.out.println(prefix+") "+tupleSpace.toString());
-    	} catch(Exception e) {
-    		System.err.println("err print tupleSpace");
-    	}
-        monitor.unlock();
+       for (Tuple t : tupleSpace) { 
+    	System.out.println(t);}
+       System.out.println("******************************************************** " + prefix);
+       monitor.unlock();
     }
 
     public Tuple tryTake(Tuple template) {
-    	// Dans le cas où le template est nul on renvoie une exception
+    	// Dans le cas oÃ¹ le template est nul on renvoie une exception
     	if (template == null) {
     		throw new NullPointerException();
     	}
@@ -374,7 +395,7 @@ public class CentralizedLindaCache implements LindaCache {
 	            }
 	        }
 	        tupleSpace.removeAll(collection);
-			finishTaking();
+		finishTaking();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -409,20 +430,73 @@ public class CentralizedLindaCache implements LindaCache {
         return collection;
     }
 
-
-    /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
+      /** Returns the value of the index of the first Tuple matching the template from the tupleSpace,
      * if it doesn't find a matching Tuple, it returns -1.
      */
     public int indexOfTemplate(List<Tuple> tupleSpace, Tuple template) {
-        int indexOfTemplate = -1;
-    	for(Tuple t : tupleSpace) {
-            if(t.matches(template)) {
-                indexOfTemplate = tupleSpace.indexOf(t);
-            }
-        }
-        return indexOfTemplate;
+        	this.indexOfTuple = -1;
+		int nbThreads = this.n;
+		int batchSize = (int) Math.floor(tupleSpace.size()/(n-1)); // Sous-division de l'espace des tuples
+		int allThreadsFinished = 0;
+	     	// Thread qui gÃ¨re le reste :
+		// Un thread s'occupe alors de parcourir cette partie de l'espace
+		new Thread() {
+			int result = -1;
+			int offset0 = batchSize*(nbThreads-1);
+			int offset1 = tupleSpace.size();
+			// On crÃ©e la sous-division i
+		 	List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+			public void run() {
+				if(this.indexOfTuple==-1){
+					result = indexOfTemplateElementary(tupleBatch,template);
+					if(result!=-1){
+						this.indexOfTuple = result+offset0;
+						result = -1;
+					}
+				}
+				allThreadsFinished++; // On incrÃ©mente un compteur
+			}
+		}.start();
+	    
+		for(int i =1; i<nbThreads; i++){
+			// Un thread s'occupe alors de parcourir cette partie de l'espace
+			new Thread() {
+				int result = -1;
+				int offset0 = batchSize*(i-1);
+				int offset1 = batchSize*i;
+				// On crÃ©e la sous-division i
+				List<Tuple> tupleBatch = tupleSpace.subList(offset0,offset1);
+				public void run() {
+					if(indexOfTuple==-1){
+						result = indexOfTemplateElementary(tupleBatch,template);
+						if(result!=-1){
+							this.indexOfTuple = result+offset0;
+							result = -1;
+						}
+					}
+					allThreadsFinished++; // On incrÃ©mente un compteur
+				}
+			}.start();
+		}
+		// Tant que l'indice n'est pas trouvÃ© ET qu'on n'a pas parcouru toutes les sous-divisions on attend
+		while((this.indexOfTuple==-1) && (allThreadsFinished!=nbThreads)){
+			// wait
+		}
+        return this.indexOfTuple;
     }
-    
+
+	// Renvoie l'indice
+	public int indexOfTemplateElementary(List<Tuple> tupleSpace, Tuple template){
+		int indexOfTemplate = -1;
+		for(Tuple t : tupleSpace) {
+			if(t.matches(template)) {
+				indexOfTemplate = tupleSpace.indexOf(t);
+				break;
+			}
+		}
+		return indexOfTemplate;
+	}
+
     
     @Override
 	public void takeRegister(Tuple tuple, Callback callback) throws RemoteException {
@@ -436,10 +510,12 @@ public class CentralizedLindaCache implements LindaCache {
 		//monitor.unlock();
 	}
     
-
+    
+    
 	@Override
     public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {
-		new Thread(() -> {try {
+		new Thread(() -> {
+			try {
 			if (timing.equals(eventTiming.IMMEDIATE)) {
 				if (mode.equals(eventMode.READ)) {
 					Tuple t = read(template);
@@ -447,7 +523,9 @@ public class CentralizedLindaCache implements LindaCache {
 				}
 				else {
 					Tuple t = take(template);
+					//new Thread(() -> {
 			    		callback.call(t);
+					//}).start();
 				}
 			} else {
 				if (mode.equals(eventMode.READ)) {

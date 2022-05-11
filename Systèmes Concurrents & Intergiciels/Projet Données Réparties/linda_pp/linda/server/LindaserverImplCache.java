@@ -19,6 +19,8 @@ import linda.Linda.eventTiming;
 import linda.Tuple;
 import linda.shm.CentralizedLinda;
 import linda.shm.CentralizedLindaCache;
+import linda.shm.CentralizedLindaCache3;
+import linda.shm.CentralizedLindaUpgrade5;
 import linda.shm.CentralizedLindaUpgrade;
 
 public class LindaserverImplCache extends UnicastRemoteObject implements LindaserverCache {
@@ -35,7 +37,7 @@ public class LindaserverImplCache extends UnicastRemoteObject implements Lindase
 	
 	// Constructeur créant un nouveau linda
 	public LindaserverImplCache() throws RemoteException {
-		this.linda = new CentralizedLindaCache();
+		this.linda = new CentralizedLindaUpgrade(4);
 	}
 	
 	//les méthodes définies dans cette classe permettent juste d'appeler à distance les méthodes de linda centralisée

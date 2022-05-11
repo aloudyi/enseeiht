@@ -5,7 +5,8 @@ import linda.*;
 public class ParallelKernelTest {
 
     public static void main(String[] a) {
-        int n = 3;
+    	for(int p=0;p<4;p++) {
+        int n = 5;
         int m = 1000;
         System.out.println("Executing with "+n+" thread(s), for "+m+" iterations");
         final Linda linda = new linda.shm.CentralizedLindaUpgrade(n);
@@ -35,13 +36,15 @@ public class ParallelKernelTest {
         new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 Tuple motif = new Tuple(Integer.class, String.class);
                 for (int i=0;i<m;i++) {
-	                Tuple res1 = linda.read(motif);
+
+                	//System.out.println("\ntake for: " + i);
+	                Tuple res1 = linda.take(motif);
 	           //     System.out.println("(1) Resultat:" + res);
 	                //linda.debug("(1)");
                 }
@@ -49,5 +52,5 @@ public class ParallelKernelTest {
             }
         }.start();
         
-    }
+    }}
 }

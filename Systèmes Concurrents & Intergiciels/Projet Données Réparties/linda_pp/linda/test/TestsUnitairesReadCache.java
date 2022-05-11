@@ -102,27 +102,28 @@ public class TestsUnitairesReadCache {
 		client.write(motif);
 		// Le motif n'est pas trouvé donc le tryRead retournera null
 		assertEquals(client.tryRead(tuple), null);
-		
+		System.out.println("kh1");
 		//Le cache ne doit contenir ni tuple ni motif 
 		assertFalse(client.cacheContains(tuple));
 		assertFalse(client.cacheContains(motif));
-		
+		System.out.println("kh2");
 		// On read maintenant le motif avec read mais puisqu'il est bloquant il faut qu'il le trouve donc on commence par un write
-		client.write(tuple);
+		client.write(tuple);System.out.println("kh1");
 		// Il doit le trouver maintenant normalement
 		
 		//Le cache ne doit contenir ni tuple ni motif 
 		assertFalse(client.cacheContains(tuple));
 		assertFalse(client.cacheContains(motif));
-		
+		System.out.println("kh3");
 		assertEquals(client.read(tuple), tuple);
-		
+		System.out.println("kh4");
 		//Le cache doit contenir le tuple mais non le motif
 		assertTrue(client.cacheContains(tuple));
 		assertFalse(client.cacheContains(motif));
-		
+		System.out.println("kh5");
 		client.take(tuple); //to test lindaserver
 		client.take(motif); //to test lindaserver
+		System.out.println("kh6");
 	}
 	
 	@Test

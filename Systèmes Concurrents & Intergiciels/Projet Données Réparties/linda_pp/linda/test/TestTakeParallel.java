@@ -28,7 +28,7 @@ public class TestTakeParallel {
 
     	@Before
     	public void setUp() {
-    		linda = new linda.shm.CentralizedLindaUpgrade();
+    		linda = new linda.shm.CentralizedLindaUpgrade5(4);
             //linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
     		
             nbThreads = 10000;

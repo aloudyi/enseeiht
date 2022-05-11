@@ -27,7 +27,7 @@ public class TestsUnitairesRead {
 
 	@Before
 	public void setUp() {
-		linda = new linda.shm.CentralizedLinda();
+		linda = new linda.shm.CentralizedLindaUpgrade5(3);
         // linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
          
 	}
@@ -88,7 +88,7 @@ public class TestsUnitairesRead {
         th.start();
         Thread.sleep(1000);
         // Puisque le tryRead n'est pas bloquant et que dans ce cas il ne trouvera pas le motif qu'il cherchait alors le thread doit se terminer
-        if (this.linda instanceof linda.shm.CentralizedLinda) {
+        if (this.linda instanceof linda.shm.CentralizedLindaUpgrade5) {
         	assertEquals(th.getState(), Thread.State.WAITING);}
         else {
         	 assertEquals(th.getState(), Thread.State.RUNNABLE);

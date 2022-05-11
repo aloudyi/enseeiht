@@ -27,7 +27,7 @@ public class TestsUnitairesTryRead {
 
 	@Before
 	public void setUp() {
-		linda = new linda.shm.CentralizedLinda();
+		linda = new linda.shm.CentralizedLindaUpgrade5(3);
         // linda = new linda.server.LindaClient("//localhost:4000/MonServeur");
 	}
 	

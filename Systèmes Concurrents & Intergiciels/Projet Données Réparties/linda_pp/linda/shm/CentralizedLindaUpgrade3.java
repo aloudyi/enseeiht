@@ -3,15 +3,12 @@ import linda.Callback;
 import linda.Linda;
 import linda.Tuple;
 import linda.server.CallbackItf;
-import linda.server.LindaCache;
 import linda.Linda.eventMode;
-
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.*;
 /** Shared memory implementation of Linda. */
-public class CentralizedLindaUpgrade implements LindaCache {
+public class CentralizedLindaUpgrade3 implements Linda {
 	// L'espace des Tuples qu'on va manipuler
     private HashMap<Integer,Tuple> tupleSpace;
     // Mon moniteur
@@ -28,8 +25,8 @@ public class CentralizedLindaUpgrade implements LindaCache {
     private int currentlyWriting;    
     // prise en cours ?
     //private boolean currentlyTaking; 
-    private boolean currentlyTaking;
-   // private List<Tuple> beingTaken; // liste des tuples en cours de suppression de l'espace des tuples, utilis�e pour pouvoir executer des take simultanement
+    private int currentlyTaking;
+    private List<Tuple> beingTaken; // liste des tuples en cours de suppression de l'espace des tuples, utilis�e pour pouvoir executer des take simultanement
     // nombre de lecteurs en cours
     private int currentReaders;
     // nombre de lecteurs en attente
@@ -44,35 +41,32 @@ public class CentralizedLindaUpgrade implements LindaCache {
 	private HashMap<Tuple, BlockingQueue<Callback>> waitingReadsOfCalls  = new HashMap<>();
 	// Les Takes bloqu�s dans les calls
 	private HashMap<Tuple, BlockingQueue<Callback>> waitingTakesOfCalls  = new HashMap<>();
-	 //La liste des callback à appeler pour un tuple
-	 private HashMap<Tuple,List<Callback>> takeCB; 
-	
 	private int n;
-	private volatile int allThreadsFinished = 0;
-	private volatile int indexOfTuple = -1;
-	private volatile int hashMapIndex = -1;
-    public CentralizedLindaUpgrade(int n) {
+	private int allThreadsFinished = 0;
+	private int indexOfTuple = -1;
+	private int hashMapIndex = -1;
+    public CentralizedLindaUpgrade3(int n) {
 		this.n = n;
         monitor = new ReentrantLock();
         readPossible = monitor.newCondition();
         takePossible = monitor.newCondition();
         writePossible = monitor.newCondition();
 		incrementHashPossible = monitor.newCondition(); // New for parallel takes
-        currentlyTaking = false;
+        currentlyTaking = 0;
         currentlyWriting = 0;
         currentReaders = 0;
         waitingReaders = 0;
         waitingWriters = 0;
-      //  beingTaken =  new ArrayList<>();
+        beingTaken =  new ArrayList<>();
         tupleSpace = new HashMap<Integer,Tuple>();
-        takeCB=new HashMap<Tuple,List<Callback>>();
+
     }
 
     // Demande Lecture
     private void startReading() throws InterruptedException {
 
         monitor.lock();       
-        while(currentlyWriting>0 || currentlyTaking) {
+        while(currentlyWriting>0 || currentlyTaking>0) {
             waitingReaders++;
             readPossible.await();
             waitingReaders--;        
@@ -99,7 +93,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
 
     }
      
-   /* private boolean contient( List<Tuple> beingTaken, Tuple motif) {
+    private boolean contient( List<Tuple> beingTaken, Tuple motif) {
     	boolean res = false;
     	for(Tuple t: beingTaken) {
     		if (t.matches(motif)) {
@@ -108,39 +102,35 @@ public class CentralizedLindaUpgrade implements LindaCache {
     		}
     	}
     	return res;
-    }*/
+    }
 
     // Demander Prise
-    private void startTaking() throws InterruptedException {
+    private void startTaking(Tuple motif) throws InterruptedException {
         monitor.lock();
         									
-        while(currentlyWriting>0 || currentReaders != 0 || waitingReaders > 0 || waitingWriters > 0 || currentlyTaking) {
+        while(currentlyWriting>0 || contient(beingTaken, motif) || currentReaders != 0 || waitingReaders > 0 || waitingWriters > 0 || currentlyTaking>this.n) {
             takePossible.await();
         }
-        //beingTaken.add(motif); 
-        currentlyTaking=true;
+        beingTaken.add(motif); 
+        currentlyTaking++;
         takePossible.signal();
 
         monitor.unlock();
     }
 
     // Terminer Prise
-    private void finishTaking() throws InterruptedException {        
+    private void finishTaking(Tuple motif) throws InterruptedException {        
         
         monitor.lock();
-        currentlyTaking=false;
-        //beingTaken.remove(motif);  
-        
-        if(waitingReaders > 0) {
-        	readPossible.signal();
-        }	else if( waitingWriters>0 ) {
-        	writePossible.signal();
+        currentlyTaking--;
+        beingTaken.remove(motif);  
+        if(currentlyTaking == 0) {
+            if(waitingReaders > 0) {
+            	readPossible.signal();
+            } else {
+                writePossible.signal();
+            }
         }
-        
-        else {
-          	takePossible.signal();
-        }
-        
         monitor.unlock();
 
     }
@@ -149,7 +139,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
     private void startWriting() throws InterruptedException {
 
         monitor.lock();
-    	while( currentlyTaking || currentReaders != 0 || waitingReaders > 0) {
+    	while( currentlyTaking>0 || currentReaders != 0 || waitingReaders > 0) {
             waitingWriters++;
             writePossible.await();
             waitingWriters--;
@@ -334,10 +324,8 @@ public class CentralizedLindaUpgrade implements LindaCache {
     	Tuple tuple = null;
         int indexOfTemplate = -1;
         try {
-            startTaking();
+            startTaking(template);
             indexOfTemplate = indexOfTemplate(tupleSpace, template);
-            
-       
             if(indexOfTemplate != -1) {
             	tuple = tupleSpace.remove(indexOfTemplate);
             	while(tuple==null) {
@@ -346,18 +334,8 @@ public class CentralizedLindaUpgrade implements LindaCache {
                     	tuple = tupleSpace.remove(indexOfTemplate);
                     }
             	}
-            	
-            	 if(takeCB.get(tuple)!=null) {
-     				
-     				for(Callback cb : takeCB.get(tuple)) {
-     					
-     					cb.call(tuple);
-     				}
-     			}
-     			takeCB.remove(tuple);
-            	
             }
-            finishTaking();
+            finishTaking(template);
         } catch ( InterruptedException e) {
             debug("khratTryTake");
         }
@@ -405,7 +383,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
       	Collection<Tuple> collection = new ArrayList<>();
       	List<Integer> keys = new ArrayList<>();
     	try {
-	    	startTaking();
+	    	startTaking(template);
 	        tupleSpace.forEach((key,t) -> {
 	            if(t.matches(template)) {
 	                // int indexOfTuple = tupleSpace.indexOf(t);
@@ -417,7 +395,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
 	        for(int key : keys) {
 	        	tupleSpace.remove(key);
 	        }
-			finishTaking();
+			finishTaking(template);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -460,9 +438,8 @@ public class CentralizedLindaUpgrade implements LindaCache {
 		int nbThreads = this.n;
 		int batchSize0 = tupleSpace.size();
 		if(n!=1) {
-			batchSize0 = (int) Math.floor(batchSize0/(n)); // Sous-division de l'espace des tuples
+			batchSize0 = (int) Math.floor(batchSize0/(n-1)); // Sous-division de l'espace des tuples
 		}
-		
 		final int batchSize = batchSize0;
 		Set<Integer> keys = tupleSpace.keySet();
 		List<Integer> keyList = new ArrayList<Integer>();
@@ -473,18 +450,16 @@ public class CentralizedLindaUpgrade implements LindaCache {
 			// Thread qui gère le reste :
 			// Un thread s'occupe alors de parcourir cette partie de l'espace
 		List<List<Integer>> batchKeys = new ArrayList<List<Integer>>();
-		//List<Integer> offsets1 = new ArrayList<Integer>();		
+		List<Integer> offsets1 = new ArrayList<Integer>();		
 		
 		int offset0 = batchSize*(nbThreads-1);
 		int offset1 = tupleSpace.size();
 		batchKeys.add(keyList.subList(offset0,offset1));
-		//System.out.println(n);
-		//System.out.println(offset0+";"+offset1);
 		for(int i =1; i<nbThreads; i++){
 			offset0 = batchSize*(i-1);
 			offset1 = batchSize*i;
 			batchKeys.add(keyList.subList(offset0,offset1));
-			//System.out.println(offset0+";"+offset1);
+
 		}
 			
 		for(int i =0; i<nbThreads; i++){
@@ -524,7 +499,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
 
 		// Tant que l'indice n'est pas trouvé ET qu'on n'a pas parcouru toutes les sous-divisions on attend
 		while((indexOfTuple==-1) && (allThreadsFinished<nbThreads)){
-			//System.out.println(allThreadsFinished);
+				// wait
 		}
 		//System.out.println("khrat 8");
 
@@ -534,21 +509,10 @@ public class CentralizedLindaUpgrade implements LindaCache {
     }
 
 	// Renvoie l'indice
-    public int indexOfTemplateElementary(HashMap<Integer,Tuple> tupleSpace, Tuple template){
-		//List<Boolean> finished = new ArrayList<Boolean>();
-		//finished.add(true);
-		//List<Integer> indexOfTemplate = new ArrayList<Integer>();
-		
-		for(Integer key : tupleSpace.keySet()) {
-			Tuple value=tupleSpace.get(key);
-			if(value.matches(template)/*&&(finished.get(finished.size()-1))*/) {
-				
-
-				//System.out.println("found "+key);
-				return key;
-			}
-		}
-		/*
+	public int indexOfTemplateElementary(HashMap<Integer,Tuple> tupleSpace, Tuple template){
+		List<Boolean> finished = new ArrayList<Boolean>();
+		finished.add(true);
+		List<Integer> indexOfTemplate = new ArrayList<Integer>();
 		tupleSpace.forEach((key,value)->{
 			if(value.matches(template)&&(finished.get(finished.size()-1))) {
 				indexOfTemplate.add(key);
@@ -559,9 +523,7 @@ public class CentralizedLindaUpgrade implements LindaCache {
 		if(!(indexOfTemplate.isEmpty())) {
 			output = indexOfTemplate.get(0);
 		}
-		return output;*/
-		//System.out.println("not found ");
-		return -1;
+		return output;
 	}
     
    /* public int indexOfTemplateElementary(HashMap<Integer,Tuple> tupleSpace, Tuple template){
@@ -594,19 +556,6 @@ public class CentralizedLindaUpgrade implements LindaCache {
         return -1;
     } */    
     
-	
-	 @Override
-		public void takeRegister(Tuple tuple, Callback callback) throws RemoteException {
-			
-	    	
-			//monitor.lock();
-	    	
-			takeCB.putIfAbsent(tuple, new ArrayList<Callback>());
-			takeCB.get(tuple).add(callback);
-			
-			//monitor.unlock();
-		}
-	    
     
 	@Override
     public void eventRegister(eventMode mode, eventTiming timing, Tuple template, Callback callback) {

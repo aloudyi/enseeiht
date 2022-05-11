@@ -4,7 +4,7 @@ import java.util.Random;
 
 import linda.*;
 import linda.server.LindaserverImplCache;
-import linda.shm.CentralizedLindaCache;
+import linda.shm.CentralizedLindaCache3;
 
 public class TestRendementCache {
 	private static LindaserverImplCache s;

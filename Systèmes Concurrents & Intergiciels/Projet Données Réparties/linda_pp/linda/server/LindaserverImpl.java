@@ -2,6 +2,7 @@ package linda.server;
 
 import java.net.InetAddress;
 
+
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,6 +16,8 @@ import linda.Linda.eventMode;
 import linda.Linda.eventTiming;
 import linda.Tuple;
 import linda.shm.CentralizedLinda;
+import linda.shm.CentralizedLindaCache;
+import linda.shm.CentralizedLindaUpgrade5;
 import linda.shm.CentralizedLindaUpgrade;
 
 public class LindaserverImpl extends UnicastRemoteObject implements Lindaserver {
@@ -30,7 +33,7 @@ public class LindaserverImpl extends UnicastRemoteObject implements Lindaserver 
 	
 	// Constructeur créant un nouveau linda
 	public LindaserverImpl() throws RemoteException {
-		this.linda = new CentralizedLindaUpgrade();
+		this.linda = new CentralizedLindaUpgrade(4);
 	}
 	
 	//les méthodes définies dans cette classe permettent juste d'appeler à distance les méthodes de linda centralisée
